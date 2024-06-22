@@ -2,12 +2,7 @@
 
 namespace OptionsProvider;
 
-public interface IOptionsProvider
-{
-    T? GetOptions<T>(string key, IReadOnlyCollection<string>? featureNames);
-}
-
-public sealed class OptionsProvider(
+public sealed class OptionsProviderWithDefaults(
     IConfiguration baseConfiguration,
     IDictionary<string, IConfigurationSource> sources) : IOptionsProvider
 {

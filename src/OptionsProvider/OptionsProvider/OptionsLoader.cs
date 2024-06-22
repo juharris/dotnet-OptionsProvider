@@ -43,7 +43,7 @@ public sealed class OptionsLoader(
             }
         }
 
-        return new OptionsProvider(baseConfiguration, sourcesMapping);
+        return new OptionsProviderWithDefaults(baseConfiguration, sourcesMapping);
     }
 
     private static async Task<FileConfig> LoadFileAsync(string rootPath, string path)

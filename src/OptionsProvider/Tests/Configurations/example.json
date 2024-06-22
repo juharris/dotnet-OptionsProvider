@@ -1,0 +1,18 @@
+{
+    "metadata": {
+        // This is an example that is also used in tests.
+        "isPersistent": true,
+        "owners": "Justin"
+    },
+    "options": {
+        "config": {
+            "sub key": [
+                "item 2"
+            ],
+            "another key": {
+                "one": 11,
+                "two": 22
+            }
+        }
+    }
+}
