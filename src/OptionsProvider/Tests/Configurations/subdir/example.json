@@ -1,6 +1,9 @@
 {
 	"metadata": {
 		// This is an example that is also used in tests.
+		"alternativeNames": [
+			"sub_example"
+		],
 		"isPersistent": true,
 		"owners": "Justin@site.com"
 	},

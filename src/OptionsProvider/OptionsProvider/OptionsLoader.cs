@@ -8,117 +8,117 @@ namespace OptionsProvider;
 /// Simple options loader.
 /// </summary>
 public sealed class OptionsLoader(
-    IConfiguration baseConfiguration)
-    : IOptionsLoader
+	IConfiguration baseConfiguration)
+	: IOptionsLoader
 {
-    private static readonly JsonSerializerOptions DeserializationOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        AllowTrailingCommas = true,
-        ReadCommentHandling = JsonCommentHandling.Skip,
-    };
+	private static readonly JsonSerializerOptions DeserializationOptions = new()
+	{
+		PropertyNameCaseInsensitive = true,
+		AllowTrailingCommas = true,
+		ReadCommentHandling = JsonCommentHandling.Skip,
+	};
 
-    /// <inheritdoc/>
-    public async Task<IOptionsProvider> LoadAsync(string rootPath)
-    {
-        var paths = Directory.EnumerateFiles(rootPath, "*.json", SearchOption.AllDirectories);
+	/// <inheritdoc/>
+	public async Task<IOptionsProvider> LoadAsync(string rootPath)
+	{
+		var paths = Directory.EnumerateFiles(rootPath, "*.json", SearchOption.AllDirectories);
 
-        // Use async tasks to load files in parallel.
-        var fileConfigs = await Task.WhenAll(paths
-            .Select(filePath => LoadFileAsync(rootPath, filePath))
-            .ToArray());
-        var sourcesMapping = new Dictionary<string, IConfigurationSource>(StringComparer.OrdinalIgnoreCase);
-        foreach (var (configPath, fileConfig) in paths.Zip(fileConfigs))
-        {
-            var name = fileConfig.Metadata.Name!;
+		// Use async tasks to load files in parallel.
+		var fileConfigs = await Task.WhenAll(paths
+			.Select(filePath => LoadFileAsync(rootPath, filePath))
+			.ToArray());
+		var sourcesMapping = new Dictionary<string, IConfigurationSource>(StringComparer.OrdinalIgnoreCase);
+		foreach (var (configPath, fileConfig) in paths.Zip(fileConfigs))
+		{
+			var name = fileConfig.Metadata.Name!;
 
-            // TODO Make sure the name and alternative names aren't already mapped.
-            sourcesMapping[name] = fileConfig.Source;
-            if (fileConfig.Metadata.AlternativeNames is not null)
-            {
-                foreach (var alternativeName in fileConfig.Metadata.AlternativeNames)
-                {
-                    sourcesMapping[alternativeName] = fileConfig.Source;
-                }
-            }
-        }
+			// TODO Make sure the name and alternative names aren't already mapped.
+			sourcesMapping[name] = fileConfig.Source;
+			if (fileConfig.Metadata.AlternativeNames is not null)
+			{
+				foreach (var alternativeName in fileConfig.Metadata.AlternativeNames)
+				{
+					sourcesMapping[alternativeName] = fileConfig.Source;
+				}
+			}
+		}
 
-        return new OptionsProviderWithDefaults(baseConfiguration, sourcesMapping);
-    }
+		return new OptionsProviderWithDefaults(baseConfiguration, sourcesMapping);
+	}
 
-    private static async Task<FileConfig> LoadFileAsync(string rootPath, string path)
-    {
-        using var stream = File.OpenRead(path);
-        var parsedContents = (await JsonSerializer.DeserializeAsync<OptionsFileSchema>(stream, DeserializationOptions))!;
-        parsedContents.Metadata.Name = Path
-                .ChangeExtension(Path.GetRelativePath(rootPath, path), null)
-                .Replace(Path.DirectorySeparatorChar, '/');
-        return new FileConfig
-        {
-            Metadata = parsedContents.Metadata,
+	private static async Task<FileConfig> LoadFileAsync(string rootPath, string path)
+	{
+		using var stream = File.OpenRead(path);
+		var parsedContents = (await JsonSerializer.DeserializeAsync<OptionsFileSchema>(stream, DeserializationOptions))!;
+		parsedContents.Metadata.Name = Path
+				.ChangeExtension(Path.GetRelativePath(rootPath, path), null)
+				.Replace(Path.DirectorySeparatorChar, '/');
+		return new FileConfig
+		{
+			Metadata = parsedContents.Metadata,
 
-            Source = new MemoryConfigurationSource
-            {
-                InitialData = BuildOptionsData(parsedContents.Options),
-            }
-        };
-    }
+			Source = new MemoryConfigurationSource
+			{
+				InitialData = BuildOptionsData(parsedContents.Options),
+			}
+		};
+	}
 
-    private static Dictionary<string, string?> BuildOptionsData(JsonElement options)
-    {
-        var result = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
-        RecurseJsonElement(options, string.Empty, result);
-        return result;
-    }
+	private static Dictionary<string, string?> BuildOptionsData(JsonElement options)
+	{
+		var result = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+		RecurseJsonElement(options, string.Empty, result);
+		return result;
+	}
 
-    private static void RecurseJsonElement(JsonElement element, string keyPrefix, Dictionary<string, string?> mapping)
-    {
-        switch (element.ValueKind)
-        {
-            case JsonValueKind.Object:
-                foreach (var property in element.EnumerateObject())
-                {
-                    RecurseJsonElement(property.Value, $"{keyPrefix}{property.Name}:", mapping);
-                }
-                break;
-            case JsonValueKind.Array:
-                int index = 0;
-                foreach (var item in element.EnumerateArray())
-                {
-                    RecurseJsonElement(item, $"{keyPrefix}{index}:", mapping);
-                    ++index;
-                }
-                break;
-            case JsonValueKind.String:
-                // Remove the trailing colon from the prefix.
-                mapping[keyPrefix[..^1]] = element.GetString();
-                break;
-            case JsonValueKind.Null:
-                // Remove the trailing colon from the prefix.
-                mapping[keyPrefix[..^1]] = null;
-                break;
-            default:
-                // Remove the trailing colon from the prefix.
-                mapping[keyPrefix[..^1]] = element.GetRawText();
-                break;
-        }
-    }
+	private static void RecurseJsonElement(JsonElement element, string keyPrefix, Dictionary<string, string?> mapping)
+	{
+		switch (element.ValueKind)
+		{
+			case JsonValueKind.Object:
+				foreach (var property in element.EnumerateObject())
+				{
+					RecurseJsonElement(property.Value, $"{keyPrefix}{property.Name}:", mapping);
+				}
+				break;
+			case JsonValueKind.Array:
+				int index = 0;
+				foreach (var item in element.EnumerateArray())
+				{
+					RecurseJsonElement(item, $"{keyPrefix}{index}:", mapping);
+					++index;
+				}
+				break;
+			case JsonValueKind.String:
+				// Remove the trailing colon from the prefix.
+				mapping[keyPrefix[..^1]] = element.GetString();
+				break;
+			case JsonValueKind.Null:
+				// Remove the trailing colon from the prefix.
+				mapping[keyPrefix[..^1]] = null;
+				break;
+			default:
+				// Remove the trailing colon from the prefix.
+				mapping[keyPrefix[..^1]] = element.GetRawText();
+				break;
+		}
+	}
 
-    /// <summary>
-    /// The converted version of a loaded configuration file.
-    /// </summary>
-    private class FileConfig
-    {
-        public required OptionsMetadata Metadata { get; init; }
-        public required IConfigurationSource Source { get; init; }
-    }
+	/// <summary>
+	/// The converted version of a loaded configuration file.
+	/// </summary>
+	private class FileConfig
+	{
+		public required OptionsMetadata Metadata { get; init; }
+		public required IConfigurationSource Source { get; init; }
+	}
 
-    /// <summary>
-    /// The schema for a configuration file.
-    /// </summary>
-    private class OptionsFileSchema
-    {
-        public required OptionsMetadata Metadata { get; set; }
-        public required JsonElement Options { get; set; }
-    }
+	/// <summary>
+	/// The schema for a configuration file.
+	/// </summary>
+	private class OptionsFileSchema
+	{
+		public required OptionsMetadata Metadata { get; set; }
+		public required JsonElement Options { get; set; }
+	}
 }

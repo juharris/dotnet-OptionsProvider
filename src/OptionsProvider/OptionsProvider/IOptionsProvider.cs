@@ -2,5 +2,5 @@
 
 public interface IOptionsProvider
 {
-    T? GetOptions<T>(string key, IReadOnlyCollection<string>? featureNames);
+	T? GetOptions<T>(string key, IReadOnlyCollection<string>? featureNames = null);
 }

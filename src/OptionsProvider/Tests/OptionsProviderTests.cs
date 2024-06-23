@@ -8,6 +8,7 @@ public class OptionsProviderTests
 	[TestMethod]
 	public async Task Test_OptionsLoader_Async()
 	{
+		// TODO Make once for all tests.
 		var configuration = new ConfigurationBuilder()
 			.AddJsonFile("appsettings.json")
 			.Build();
@@ -15,6 +16,7 @@ public class OptionsProviderTests
 		var loader = new OptionsLoader(configuration);
 		var optionsProvider = await loader.LoadAsync("Configurations");
 
-		// Add config files and tests.
+		var config = optionsProvider.GetOptions<MyConfiguration>("config");
+		Assert.IsNotNull(config);
 	}
 }
