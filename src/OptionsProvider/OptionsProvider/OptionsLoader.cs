@@ -22,7 +22,7 @@ public sealed class OptionsLoader(
 	public async Task<IOptionsProvider> LoadAsync(string rootPath)
 	{
 		var paths = Directory.EnumerateFiles(rootPath, "*.json", SearchOption.AllDirectories)
-			// Ensure that the files are loaded in a consistent order.
+			// Ensure that the files are loaded in a consistent order so that errors are consistent on different machines.
 			.Order();
 
 		// Use async tasks to load files in parallel.
