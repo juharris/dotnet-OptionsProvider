@@ -32,13 +32,19 @@ public sealed class OptionsLoader(
 		{
 			var name = fileConfig.Metadata.Name!;
 
-			// TODO Make sure the name and alternative names aren't already mapped.
-			sourcesMapping[name] = fileConfig.Source;
+			if (!sourcesMapping.TryAdd(name, fileConfig.Source))
+			{
+				throw new InvalidOperationException($"The name \"{name}\" for the configuration file \"{configPath}\" is already used.");
+			}
+
 			if (fileConfig.Metadata.AlternativeNames is not null)
 			{
 				foreach (var alternativeName in fileConfig.Metadata.AlternativeNames)
 				{
-					sourcesMapping[alternativeName] = fileConfig.Source;
+					if (!sourcesMapping.TryAdd(alternativeName, fileConfig.Source))
+					{
+						throw new InvalidOperationException($"The alternative name \"{alternativeName}\" for the configuration file \"{configPath}\" is already used.");
+					}
 				}
 			}
 		}

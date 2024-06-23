@@ -79,6 +79,15 @@ public class OptionsProviderTests
 	}
 
 	[TestMethod]
+	public async Task Test_LoadAsync_with_Existing_Name()
+	{
+		var loader = new OptionsLoader(new ConfigurationBuilder().Build());
+		var action = () => loader.LoadAsync("InvalidConfigurations");
+		await action.Should().ThrowAsync<InvalidOperationException>()
+			.WithMessage($"The name \"other example\" for the configuration file \"{Path.Combine("InvalidConfigurations", "other example.json")}\" is already used.");
+	}
+
+	[TestMethod]
 	[Ignore("Caching logic is not implemented yet.")]
 	public void Test_GetOptions_Same_Instance()
 	{
