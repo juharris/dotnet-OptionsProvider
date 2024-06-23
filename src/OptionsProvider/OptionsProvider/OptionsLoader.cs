@@ -21,7 +21,9 @@ public sealed class OptionsLoader(
 	/// <inheritdoc/>
 	public async Task<IOptionsProvider> LoadAsync(string rootPath)
 	{
-		var paths = Directory.EnumerateFiles(rootPath, "*.json", SearchOption.AllDirectories);
+		var paths = Directory.EnumerateFiles(rootPath, "*.json", SearchOption.AllDirectories)
+			// Ensure that the files are loaded in a consistent order.
+			.Order();
 
 		// Use async tasks to load files in parallel.
 		var fileConfigs = await Task.WhenAll(paths
