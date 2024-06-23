@@ -73,9 +73,8 @@ public class OptionsProviderTests
 		Assert.IsNotNull(array);
 		array.Should().Equal(ExampleMyConfiguration.Array);
 
-		var list = OptionsProvider.GetOptions<List<string>>("config:array", ["example"]);
-		Assert.IsNotNull(list);
-		list.Should().Equal(ExampleMyConfiguration.Array);
+		var one = OptionsProvider.GetOptions<int>("config:object:one", ["sub_example"]);
+		one.Should().Be(SubExampleMyConfiguration.Object!.One);
 	}
 
 	[TestMethod]
@@ -88,7 +87,14 @@ public class OptionsProviderTests
 	}
 
 	[TestMethod]
-	[Ignore("Caching logic is not implemented yet.")]
+	public void Test_GetOptions_Same_Instance_without_Features()
+	{
+		var config1 = OptionsProvider.GetOptions<MyConfiguration>("config");
+		var config2 = OptionsProvider.GetOptions<MyConfiguration>("config");
+		Assert.AreSame(config1, config2);
+	}
+
+	[TestMethod]
 	public void Test_GetOptions_Same_Instance()
 	{
 		var config1 = OptionsProvider.GetOptions<MyConfiguration>("config", ["example"]);
