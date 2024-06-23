@@ -5,15 +5,17 @@ namespace OptionsProvider;
 
 internal sealed record class CacheKey(
 	string ConfigKey,
-	IReadOnlyCollection<string>? FeatureNames)
+	List<string>? FeatureNames)
 {
 	public bool Equals(CacheKey? other)
 	{
 		// Assume other is not `null` and they will not be the same reference.
 		return this.ConfigKey == other!.ConfigKey
-			&& (this.FeatureNames is null && other.FeatureNames is null
-			|| (this.FeatureNames is not null && other.FeatureNames is not null
-				&& Enumerable.SequenceEqual(this.FeatureNames, other.FeatureNames)));
+			// Assume there will usually be features and check for equality first.
+			&& ((this.FeatureNames is not null && other.FeatureNames is not null
+				&& this.FeatureNames.SequenceEqual(other.FeatureNames))
+				// Assume it is rare for there to be no features.
+				|| (this.FeatureNames is null && other.FeatureNames is null));
 	}
 
 	public override int GetHashCode()
@@ -41,7 +43,7 @@ internal sealed class OptionsProviderWithDefaults(
 
 	public T? GetOptions<T>(string key, IReadOnlyCollection<string>? featureNames = null)
 	{
-		// Valid the feature names.
+		// Valid the feature names and map their canonical names.
 		List<string>? mappedFeatureNames = null;
 		if (featureNames is not null)
 		{
