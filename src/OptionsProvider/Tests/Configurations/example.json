@@ -6,12 +6,12 @@
 	},
 	"options": {
 		"config": {
-			"sub key": [
-				"item 2"
+			"array": [
+				"example item 1"
 			],
-			"another key": {
-				"one": 11,
-				"two": 22
+			"object": {
+				"one": 1,
+				"two": 2
 			}
 		}
 	}

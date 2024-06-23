@@ -9,12 +9,14 @@
 	},
 	"options": {
 		"config": {
-			"sub key": [
-				"item 2"
+			"array": [
+				"sub_example item 1",
+				"sub_example item 2"
 			],
-			"another key": {
+			"object": {
 				"one": 11,
-				"two": 22
+				"two": 22,
+				"three": 3
 			}
 		}
 	}

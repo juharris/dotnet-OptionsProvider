@@ -13,4 +13,5 @@ internal class MyObject
 {
 	public int One { get; init; }
 	public double Two { get; init; }
+	public uint? Three { get; init; }
 }

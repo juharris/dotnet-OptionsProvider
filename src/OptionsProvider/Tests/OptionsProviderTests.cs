@@ -7,8 +7,25 @@ public class OptionsProviderTests
 {
 	// Won't be `null` when running tests.
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-	public static IOptionsProvider OptionsProvider { get; private set; }
+	private static IOptionsProvider OptionsProvider;
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+
+	private static readonly MyConfiguration DefaultMyConfiguration = new()
+	{
+		Array = ["item 1"],
+		Object = new MyObject { One = 1, Two = 2.0 },
+	};
+	private static readonly MyConfiguration ExampleMyConfiguration = new()
+	{
+		Array = ["example item 1"],
+		Object = new MyObject { One = 1, Two = 2.0 },
+	};
+
+	private static readonly MyConfiguration SubExampleMyConfiguration = new()
+	{
+		Array = ["sub_example item 1", "sub_example item 2"],
+		Object = new MyObject { One = 11, Two = 22, Three = 3, },
+	};
 
 	[AssemblyInitialize]
 	public static async Task ConfigureOptionsProvider(TestContext _)
@@ -33,22 +50,19 @@ public class OptionsProviderTests
 	{
 		var config = OptionsProvider.GetOptions<MyConfiguration>("config");
 		Assert.IsNotNull(config);
-		config.Array.Should().Equal(["item 1"]);
-		config.Object.Should().BeEquivalentTo(new MyObject { One = 1, Two = 2.0 });
+		config.Should().BeEquivalentTo(DefaultMyConfiguration);
 	}
 
-	// TODO Test some values.
-	[DataRow]
-	[DataRow("example")]
-	[DataRow("subdir/example")]
-	[DataRow("sub_example")]
 	[TestMethod]
-	public void Test_GetOptions_with_Features(params string[] features)
+	public void Test_GetOptions_with_Features()
 	{
-		var config = OptionsProvider.GetOptions<MyConfiguration>("config", features);
+		var config = OptionsProvider.GetOptions<MyConfiguration>("config", ["example"]);
 		Assert.IsNotNull(config);
-		config.Array.Should().Equal(["item 1"]);
-		config.Object.Should().BeEquivalentTo(new MyObject { One = 1, Two = 2.0 });
+		config.Should().BeEquivalentTo(ExampleMyConfiguration);
+
+		config = OptionsProvider.GetOptions<MyConfiguration>("config", ["sub_example"]);
+		Assert.IsNotNull(config);
+		config.Should().BeEquivalentTo(SubExampleMyConfiguration);
 	}
 
 	[TestMethod]
