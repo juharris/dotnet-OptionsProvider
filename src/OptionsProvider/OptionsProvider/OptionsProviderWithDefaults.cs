@@ -35,6 +35,7 @@ internal sealed class OptionsProviderWithDefaults(
 	IConfiguration baseConfiguration,
 	IDictionary<string, IConfigurationSource> sources) : IOptionsProvider
 {
+	// TODO Support configuring the cache with a memory cache or providing an option to disable the cache.
 	private readonly ConcurrentDictionary<CacheKey, object?> cache = new();
 
 	public T? GetOptions<T>(string key, IReadOnlyCollection<string>? featureNames = null)
