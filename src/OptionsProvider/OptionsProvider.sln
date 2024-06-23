@@ -3,14 +3,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptionsProvider", "OptionsProvider\OptionsProvider.csproj", "{AF092B3C-8375-400A-987B-964C20658700}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptionsProvider", "OptionsProvider\OptionsProvider.csproj", "{AF092B3C-8375-400A-987B-964C20658700}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1B7AF090-AFF3-43A9-A69D-95496755A997}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{C708B50F-161E-4269-B4FE-4204FDE3987F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptionsProvider.Tests", "Tests\OptionsProvider.Tests.csproj", "{C708B50F-161E-4269-B4FE-4204FDE3987F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{E5B3939C-77E1-4207-9A2B-11E6F0EE8260}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,6 +31,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C708B50F-161E-4269-B4FE-4204FDE3987F} = {E5B3939C-77E1-4207-9A2B-11E6F0EE8260}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0E846D40-7889-4DE2-97C9-1DD6A285F0B9}

@@ -40,7 +40,7 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore --configuration Release *.sln
-    - name: Test
-      run: dotnet test --no-build --verbosity normal --configuration Release *.sln
     - name: Lint
       run: dotnet format --verify-no-changes --severity info --no-restore *.sln
+    - name: Test
+      run: dotnet test --no-build --verbosity normal --configuration Release *.sln
