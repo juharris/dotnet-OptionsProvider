@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 
 namespace OptionsProvider.Tests;
@@ -21,14 +22,16 @@ public class OptionsLoaderTests
 			.Build();
 
 		var loader = new OptionsLoader(configuration);
-		OptionsProvider = await loader.LoadAsync("Configurations");
+		var cache = new MemoryCache(new MemoryCacheOptions());
+		OptionsProvider = await loader.LoadAsync("Configurations", cache);
 	}
 
 	[TestMethod]
 	public async Task Test_LoadAsync_with_Existing_Name()
 	{
 		var loader = new OptionsLoader(new ConfigurationBuilder().Build());
-		var action = () => loader.LoadAsync("InvalidConfigurations");
+		using var cache = new MemoryCache(new MemoryCacheOptions());
+		var action = () => loader.LoadAsync("InvalidConfigurations", cache);
 		await action.Should().ThrowAsync<InvalidOperationException>()
 			.WithMessage($"The name \"other example\" for the configuration file \"{Path.Combine("InvalidConfigurations", "other example.json")}\" is already used.");
 	}

@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Memory;
 
@@ -19,7 +20,9 @@ public sealed class OptionsLoader(
 	};
 
 	/// <inheritdoc/>
-	public async Task<IOptionsProvider> LoadAsync(string rootPath)
+	public async Task<IOptionsProvider> LoadAsync(
+		string rootPath,
+		IMemoryCache cache)
 	{
 		var paths = Directory.EnumerateFiles(rootPath, "*.json", SearchOption.AllDirectories)
 			// Ensure that the files are loaded in a consistent order so that errors are consistent on different machines.
@@ -55,7 +58,7 @@ public sealed class OptionsLoader(
 			}
 		}
 
-		return new OptionsProviderWithDefaults(baseConfiguration, sourcesMapping, altNameMapping);
+		return new OptionsProviderWithDefaults(baseConfiguration, cache, sourcesMapping, altNameMapping);
 	}
 
 	private static async Task<FileConfig> LoadFileAsync(string rootPath, string path)

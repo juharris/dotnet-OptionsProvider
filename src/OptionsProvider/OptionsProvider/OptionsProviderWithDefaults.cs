@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 
 namespace OptionsProvider;
@@ -35,12 +36,10 @@ internal sealed record class CacheKey(
 
 internal sealed class OptionsProviderWithDefaults(
 	IConfiguration baseConfiguration,
+	IMemoryCache cache,
 	IDictionary<string, IConfigurationSource> sources,
 	Dictionary<string, string> altNameMapping) : IOptionsProvider
 {
-	// TODO Support configuring the cache with a memory cache or providing an option to disable the cache.
-	private readonly ConcurrentDictionary<CacheKey, object?> cache = new();
-
 	public T? GetOptions<T>(string key, IReadOnlyCollection<string>? featureNames = null)
 	{
 		// Valid the feature names and map their canonical names.
@@ -59,7 +58,10 @@ internal sealed class OptionsProviderWithDefaults(
 		}
 
 		var cacheKey = new CacheKey(key, mappedFeatureNames);
-		return (T?)this.cache.GetOrAdd(cacheKey, _ => this.GetOptionsInternal<T>(key, mappedFeatureNames));
+		return (T?)cache.GetOrCreate(cacheKey, entry => {
+			// TODO entry.SetOptions(options);
+			return this.GetOptionsInternal<T>(key, mappedFeatureNames);
+		});
 	}
 
 	private T? GetOptionsInternal<T>(string key, IReadOnlyCollection<string>? featureNames = null)
