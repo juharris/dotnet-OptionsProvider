@@ -1,6 +1,8 @@
 # OptionsProvider
 Enables loading configurations from files to manage options for experiments or flights.
 
+<!-- TODO Add examples, DI examples, notes about disposal for the IMemoryCache. -->
+
 # Development
 ## Code Formatting
 CI enforces:
