@@ -77,6 +77,15 @@ public class OptionsProviderTests
 		one.Should().Be(SubExampleMyConfiguration.Object!.One);
 	}
 
+
+	[TestMethod]
+	public void Test_GetOptions_with_Unknown_Feature()
+	{
+		var action = () => OptionsProvider.GetOptions<MyConfiguration>("config", ["unknown"]);
+		action.Should().Throw<InvalidOperationException>()
+			.WithMessage("The given feature name \"unknown\" is not a known feature.");
+	}
+
 	[TestMethod]
 	public async Task Test_LoadAsync_with_Existing_Name()
 	{
@@ -98,16 +107,15 @@ public class OptionsProviderTests
 	public void Test_GetOptions_Same_Instance()
 	{
 		var config1 = OptionsProvider.GetOptions<MyConfiguration>("config", ["example"]);
-		var config2 = OptionsProvider.GetOptions<MyConfiguration>("config", ["example"]);
+		var config2 = OptionsProvider.GetOptions<MyConfiguration>("config", ["eXamPlE"]);
 		Assert.AreSame(config1, config2);
 	}
 
 	[TestMethod]
-	[Ignore("Caching logic is not implemented yet.")]
 	public void Test_GetOptions_Same_Instance_With_AlternativeName()
 	{
 		var config1 = OptionsProvider.GetOptions<MyConfiguration>("config", ["subdir/example"]);
-		var config2 = OptionsProvider.GetOptions<MyConfiguration>("config", ["sub_example"]);
+		var config2 = OptionsProvider.GetOptions<MyConfiguration>("config", ["sub_eXaMpLe"]);
 		Assert.AreSame(config1, config2);
 	}
 }

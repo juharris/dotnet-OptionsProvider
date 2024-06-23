@@ -27,29 +27,33 @@ public sealed class OptionsLoader(
 		var fileConfigs = await Task.WhenAll(paths
 			.Select(filePath => LoadFileAsync(rootPath, filePath))
 			.ToArray());
+		var altNameMapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 		var sourcesMapping = new Dictionary<string, IConfigurationSource>(StringComparer.OrdinalIgnoreCase);
 		foreach (var (configPath, fileConfig) in paths.Zip(fileConfigs))
 		{
 			var name = fileConfig.Metadata.Name!;
 
-			if (!sourcesMapping.TryAdd(name, fileConfig.Source))
+			// Provide a canonical case-insensitive name for the configuration which also simplifies mapping alternative names to the canonical name.
+			if (!altNameMapping.TryAdd(name, name))
 			{
 				throw new InvalidOperationException($"The name \"{name}\" for the configuration file \"{configPath}\" is already used.");
 			}
+
+			sourcesMapping[name] = fileConfig.Source;
 
 			if (fileConfig.Metadata.AlternativeNames is not null)
 			{
 				foreach (var alternativeName in fileConfig.Metadata.AlternativeNames)
 				{
-					if (!sourcesMapping.TryAdd(alternativeName, fileConfig.Source))
+					if (!altNameMapping.TryAdd(alternativeName, name))
 					{
-						throw new InvalidOperationException($"The alternative name \"{alternativeName}\" for the configuration file \"{configPath}\" is already used.");
+						throw new InvalidOperationException($"The name \"{name}\" for the configuration file \"{configPath}\" is already used.");
 					}
 				}
 			}
 		}
 
-		return new OptionsProviderWithDefaults(baseConfiguration, sourcesMapping);
+		return new OptionsProviderWithDefaults(baseConfiguration, sourcesMapping, altNameMapping);
 	}
 
 	private static async Task<FileConfig> LoadFileAsync(string rootPath, string path)

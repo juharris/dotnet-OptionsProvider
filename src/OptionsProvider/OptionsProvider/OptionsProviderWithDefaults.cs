@@ -33,16 +33,31 @@ internal sealed record class CacheKey(
 
 internal sealed class OptionsProviderWithDefaults(
 	IConfiguration baseConfiguration,
-	IDictionary<string, IConfigurationSource> sources) : IOptionsProvider
+	IDictionary<string, IConfigurationSource> sources,
+	Dictionary<string, string> altNameMapping) : IOptionsProvider
 {
 	// TODO Support configuring the cache with a memory cache or providing an option to disable the cache.
 	private readonly ConcurrentDictionary<CacheKey, object?> cache = new();
 
 	public T? GetOptions<T>(string key, IReadOnlyCollection<string>? featureNames = null)
 	{
-		// TODO Map feature names so that the cache works with alt names.
-		var cacheKey = new CacheKey(key, featureNames);
-		return (T?)this.cache.GetOrAdd(cacheKey, _ => this.GetOptionsInternal<T>(key, featureNames));
+		// Valid the feature names.
+		List<string>? mappedFeatureNames = null;
+		if (featureNames is not null)
+		{
+			mappedFeatureNames = new List<string>(featureNames.Count);
+			foreach (var featureName in featureNames)
+			{
+				if (!altNameMapping.TryGetValue(featureName, out string? canonicalFeatureName))
+				{
+					throw new InvalidOperationException($"The given feature name \"{featureName}\" is not a known feature.");
+				}
+				mappedFeatureNames.Add(canonicalFeatureName);
+			}
+		}
+
+		var cacheKey = new CacheKey(key, mappedFeatureNames);
+		return (T?)this.cache.GetOrAdd(cacheKey, _ => this.GetOptionsInternal<T>(key, mappedFeatureNames));
 	}
 
 	private T? GetOptionsInternal<T>(string key, IReadOnlyCollection<string>? featureNames = null)
@@ -59,14 +74,8 @@ internal sealed class OptionsProviderWithDefaults(
 		// Apply the features in order so that the last ones takes precedence, just like how when multiple appsettings.json files are used.
 		foreach (var featureName in featureNames)
 		{
-			if (sources.TryGetValue(featureName, out var source))
-			{
-				configurationBuilder.Add(source);
-			}
-			else
-			{
-				throw new InvalidOperationException($"Feature '{featureName}' is not a known feature.");
-			}
+			var source = sources[featureName];
+			configurationBuilder.Add(source);
 		}
 
 		var configuration = configurationBuilder.Build();
