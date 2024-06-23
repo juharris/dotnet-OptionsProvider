@@ -15,6 +15,7 @@ public class OptionsProviderTests
 		Array = ["item 1"],
 		Object = new MyObject { One = 1, Two = 2.0 },
 	};
+
 	private static readonly MyConfiguration ExampleMyConfiguration = new()
 	{
 		Array = ["example item 1"],
@@ -63,6 +64,18 @@ public class OptionsProviderTests
 		config = OptionsProvider.GetOptions<MyConfiguration>("config", ["sub_example"]);
 		Assert.IsNotNull(config);
 		config.Should().BeEquivalentTo(SubExampleMyConfiguration);
+	}
+
+	[TestMethod]
+	public void Test_GetOptions_For_Deep_Key()
+	{
+		var array = OptionsProvider.GetOptions<string[]>("config:array", ["example"]);
+		Assert.IsNotNull(array);
+		array.Should().Equal(ExampleMyConfiguration.Array);
+
+		var list = OptionsProvider.GetOptions<List<string>>("config:array", ["example"]);
+		Assert.IsNotNull(list);
+		list.Should().Equal(ExampleMyConfiguration.Array);
 	}
 
 	[TestMethod]
