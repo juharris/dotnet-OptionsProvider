@@ -103,4 +103,23 @@ public class OptionsProviderTests
 		var config2 = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["sub_eXaMpLe"]);
 		Assert.AreSame(config1, config2);
 	}
+
+	[TestMethod]
+	public void Test_GetOptions_Example_Sub_Example()
+	{
+		var config = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["example", "subdir/example"]);
+		config.Should().BeEquivalentTo(SubExampleMyConfiguration);
+	}
+
+	[TestMethod]
+	public void Test_GetOptions_Sub_Example_Example()
+	{
+		var expected = new MyConfiguration()
+		{
+			Array = ["example item 1", "sub_example item 2"],
+			Object = new MyObject { One = 11, Two = 22, Three = 3 },
+		};
+		var config = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["sub_example", "example"]);
+		config.Should().BeEquivalentTo(expected);
+	}
 }
