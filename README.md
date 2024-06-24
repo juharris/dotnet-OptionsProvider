@@ -142,14 +142,14 @@ class MyClass(IOptionsSnapshot<MyConfiguration> options)
 ```
 
 If `enabledFeatures` is `["A", "B"]`, then `MyConfiguration` will be built in this order:
-1. Apply the default values from `appsettings.json` under `"config"`.
+1. Apply the default values the injected `IConfiguration`, i.e. the values from `appsettings.json` under `"config"`.
 2. Apply the values from `Configurations/feature_A.json`.
 3. Apply the values from `Configurations/feature_B/initial.json`.
 
 ## Caching
 `["A", "B"]` is treated the same as `["a", "FeAtuRe_B/iNiTiAl"]` because using an alias is equivalent to using the path to the file and names and aliases are case-insensitive.
 Both examples would retrieve the same instance from the cache and `IOptionsProvider` would return the same instance.
-If `IOptionsSnapshot<MyConfiguration>` then `MyConfiguration` will still only be built once and cached, but a different instance would be returned from `IOptionsSnapshot<MyConfiguration>.Value` because the options pattern creates a new instance each time.
+If `IOptionsSnapshot<MyConfiguration>` is used, then `MyConfiguration` will still only be built once and cached, but a different instance would be returned from `IOptionsSnapshot<MyConfiguration>.Value` for each scope because the options pattern creates a new instance each time.
 
 # Development
 ## Code Formatting
