@@ -45,9 +45,9 @@ public sealed class OptionsLoader(
 
 			sourcesMapping[name] = fileConfig.Source;
 
-			if (fileConfig.Metadata.AlternativeNames is not null)
+			if (fileConfig.Metadata.Aliases is not null)
 			{
-				foreach (var alternativeName in fileConfig.Metadata.AlternativeNames)
+				foreach (var alternativeName in fileConfig.Metadata.Aliases)
 				{
 					if (!altNameMapping.TryAdd(alternativeName, name))
 					{

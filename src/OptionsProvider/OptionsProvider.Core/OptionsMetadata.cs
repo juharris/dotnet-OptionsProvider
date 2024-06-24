@@ -19,7 +19,7 @@ public sealed class OptionsMetadata
 	/// <remarks>
 	/// This is helpful for using custom short names for the group of options.
 	/// </remarks>
-	public string[]? AlternativeNames { get; set; }
+	public string[]? Aliases { get; set; }
 
 	/// <summary>
 	/// The creators or maintainers of this group of options.

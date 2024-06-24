@@ -1,7 +1,7 @@
 {
 	"metadata": {
 		// This is an example that is also used in tests.
-		"alternativeNames": [ "other example" ],
+		"aliases": [ "other example" ],
 		"owners": "Justin@site.com"
 	},
 	"options": {}
