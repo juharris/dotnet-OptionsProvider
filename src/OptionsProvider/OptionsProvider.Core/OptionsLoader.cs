@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Memory;
-using YamlDotNet.Serialization.NamingConventions;
 
 namespace OptionsProvider;
 
@@ -20,6 +19,15 @@ public sealed class OptionsLoader(
 		AllowTrailingCommas = true,
 		ReadCommentHandling = JsonCommentHandling.Skip,
 	};
+
+	private static readonly YamlDotNet.Serialization.IDeserializer YamlDeserializer
+		= new YamlDotNet.Serialization.DeserializerBuilder()
+					.WithAttemptingUnquotedStringTypeDeserialization()
+					.Build();
+	private static readonly YamlDotNet.Serialization.ISerializer YamlToJsonSerializer
+		= new YamlDotNet.Serialization.SerializerBuilder()
+					.JsonCompatible()
+					.Build();
 
 	/// <inheritdoc/>
 	public async Task<IOptionsProvider> LoadAsync(string rootPath)
@@ -78,21 +86,14 @@ public sealed class OptionsLoader(
 				// Assume YAML.
 				// Convert to JSON so that we can use `JsonElement` just like with JSON files.
 				// Maybe some parts of this should be optimized and tweaked to handle other cases, but it seems fine for now.
-				var deserializer = new YamlDotNet.Serialization.DeserializerBuilder()
-					.WithAttemptingUnquotedStringTypeDeserialization()
-					.WithNamingConvention(CamelCaseNamingConvention.Instance)
-					.Build();
 				using var stream = File.OpenRead(path);
 				using var reader = new StreamReader(stream);
-				var yamlObject = deserializer.Deserialize(reader);
-
-				var serializer = new YamlDotNet.Serialization.SerializerBuilder()
-					.JsonCompatible()
-					.Build();
-				var contents = serializer.Serialize(yamlObject);
+				var yamlObject = YamlDeserializer.Deserialize(reader);
+				var contents = YamlToJsonSerializer.Serialize(yamlObject);
 				parsedContents = JsonSerializer.Deserialize<OptionsFileSchema>(contents, DeserializationOptions)!;
 			}
 
+			// Remove the extensions and convert the path to a relative path from `rootPath`.
 			parsedContents.Metadata.Name = Path
 					.ChangeExtension(Path.GetRelativePath(rootPath, path), null)
 					.Replace(Path.DirectorySeparatorChar, '/');
