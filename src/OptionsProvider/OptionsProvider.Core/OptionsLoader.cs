@@ -76,9 +76,9 @@ public sealed class OptionsLoader(
 		try
 		{
 			OptionsFileSchema parsedContents;
+			using var stream = File.OpenRead(path);
 			if (path.EndsWith(".json"))
 			{
-				using var stream = File.OpenRead(path);
 				parsedContents = (await JsonSerializer.DeserializeAsync<OptionsFileSchema>(stream, DeserializationOptions))!;
 			}
 			else
@@ -86,7 +86,6 @@ public sealed class OptionsLoader(
 				// Assume YAML.
 				// Convert to JSON so that we can use `JsonElement` just like with JSON files.
 				// Maybe some parts of this should be optimized and tweaked to handle other cases, but it seems fine for now.
-				using var stream = File.OpenRead(path);
 				using var reader = new StreamReader(stream);
 				var yamlObject = YamlDeserializer.Deserialize(reader);
 				var contents = YamlToJsonSerializer.Serialize(yamlObject);
