@@ -1,6 +1,12 @@
 # OptionsProvider
 Enables loading configurations from files to manage options for experiments or flights.
 
+Features:
+* Load files which contain options to override configuration values when processing feature names, flight names, or experiment names in a request.
+* Use clear files in the repository.
+* Use separate files to keep independent configurations clear and easily maintainable.
+* Use the same logic that `ConfigurationBuilder` uses to load files so that it's easy to understand as it's the same as how `appsettings*.json` files are loaded.
+
 <!-- TODO Add examples, DI examples, notes about disposal for the IMemoryCache. -->
 
 # Example

@@ -25,6 +25,7 @@ public class OptionsLoaderTests
 		ServiceProvider = new ServiceCollection()
 			.AddSingleton<IConfiguration>(configuration)
 			.AddOptionsProvider("Configurations")
+			.ConfigureOptions<MyConfiguration>("config")
 			.BuildServiceProvider();
 		OptionsProvider = ServiceProvider.GetRequiredService<IOptionsProvider>();
 	}

@@ -5,8 +5,8 @@
 /// </summary>
 internal class MyConfiguration
 {
-	public string[]? Array { get; init; }
-	public MyObject? Object { get; init; }
+	public string[]? Array { get; set; }
+	public MyObject? Object { get; set; }
 }
 
 internal class MyObject

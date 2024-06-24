@@ -1,3 +1,6 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+
 namespace OptionsProvider.Tests;
 
 [TestClass]
@@ -81,6 +84,16 @@ public class OptionsProviderTests
 		var config1 = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["example"]);
 		var config2 = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["eXamPlE"]);
 		Assert.AreSame(config1, config2);
+
+		// Test with IOptionsSnapshot.
+		// Putting all tests for "example" in one method to avoid concurrency issues.
+		{
+			using var scope = OptionsLoaderTests.ServiceProvider.CreateScope();
+			var featuresContext = scope.ServiceProvider.GetRequiredService<IFeaturesContext>();
+			featuresContext.FeatureNames = ["example"];
+			var config = scope.ServiceProvider.GetRequiredService<IOptionsSnapshot<MyConfiguration>>().Value;
+			config.Should().BeEquivalentTo(ExampleMyConfiguration);
+		}
 	}
 
 	[TestMethod]
