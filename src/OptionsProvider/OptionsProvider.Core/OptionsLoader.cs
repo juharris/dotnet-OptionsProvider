@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Memory;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace OptionsProvider;
 
@@ -24,6 +25,8 @@ public sealed class OptionsLoader(
 	public async Task<IOptionsProvider> LoadAsync(string rootPath)
 	{
 		var paths = Directory.EnumerateFiles(rootPath, "*.json", SearchOption.AllDirectories)
+			.Concat(Directory.EnumerateFiles(rootPath, "*.yaml", SearchOption.AllDirectories))
+			.Concat(Directory.EnumerateFiles(rootPath, "*.yml", SearchOption.AllDirectories))
 			// Ensure that the files are loaded in a consistent order so that errors are consistent on different machines.
 			.Order();
 
@@ -62,20 +65,51 @@ public sealed class OptionsLoader(
 
 	private static async Task<FileConfig> LoadFileAsync(string rootPath, string path)
 	{
-		using var stream = File.OpenRead(path);
-		var parsedContents = (await JsonSerializer.DeserializeAsync<OptionsFileSchema>(stream, DeserializationOptions))!;
-		parsedContents.Metadata.Name = Path
-				.ChangeExtension(Path.GetRelativePath(rootPath, path), null)
-				.Replace(Path.DirectorySeparatorChar, '/');
-		return new FileConfig
+		try
 		{
-			Metadata = parsedContents.Metadata,
-
-			Source = new MemoryConfigurationSource
+			OptionsFileSchema parsedContents;
+			if (path.EndsWith(".json"))
 			{
-				InitialData = BuildOptionsData(parsedContents.Options),
+				using var stream = File.OpenRead(path);
+				parsedContents = (await JsonSerializer.DeserializeAsync<OptionsFileSchema>(stream, DeserializationOptions))!;
 			}
-		};
+			else
+			{
+				// Assume YAML.
+				// Convert to JSON so that we can use `JsonElement` just like with JSON files.
+				// Maybe some parts of this should be optimized and tweaked to handle other cases, but it seems fine for now.
+				var deserializer = new YamlDotNet.Serialization.DeserializerBuilder()
+					.WithAttemptingUnquotedStringTypeDeserialization()
+					.WithNamingConvention(CamelCaseNamingConvention.Instance)
+					.Build();
+				using var stream = File.OpenRead(path);
+				using var reader = new StreamReader(stream);
+				var yamlObject = deserializer.Deserialize(reader);
+
+				var serializer = new YamlDotNet.Serialization.SerializerBuilder()
+					.JsonCompatible()
+					.Build();
+				var contents = serializer.Serialize(yamlObject);
+				parsedContents = JsonSerializer.Deserialize<OptionsFileSchema>(contents, DeserializationOptions)!;
+			}
+
+			parsedContents.Metadata.Name = Path
+					.ChangeExtension(Path.GetRelativePath(rootPath, path), null)
+					.Replace(Path.DirectorySeparatorChar, '/');
+			return new FileConfig
+			{
+				Metadata = parsedContents.Metadata,
+
+				Source = new MemoryConfigurationSource
+				{
+					InitialData = BuildOptionsData(parsedContents.Options),
+				}
+			};
+		}
+		catch (Exception ex)
+		{
+			throw new InvalidOperationException($"Failed to load configuration file \"{path}\".", ex);
+		}
 	}
 
 	private static Dictionary<string, string?> BuildOptionsData(JsonElement options)

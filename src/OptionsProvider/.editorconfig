@@ -3,6 +3,11 @@ end_of_line = lf
 indent_style = tab
 insert_final_newline = false
 
+[*.{yaml,yml}]
+end_of_line = lf
+indent_style = space
+insert_final_newline = false
+
 [*.csproj]
 end_of_line = lf
 indent_style = tab
