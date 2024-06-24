@@ -20,11 +20,11 @@ public class OptionsProviderTests
 		Array = ["sub_example item 1", "sub_example item 2"],
 		Object = new MyObject { One = 11, Two = 22, Three = 3, },
 	};
-	
+
 	[TestMethod]
 	public void Test_GetOptions_No_Config()
 	{
-		var config =  OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("does not exist");
+		var config = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("does not exist");
 		Assert.IsNull(config);
 	}
 

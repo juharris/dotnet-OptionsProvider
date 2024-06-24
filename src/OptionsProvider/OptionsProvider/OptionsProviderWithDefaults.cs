@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 
 namespace OptionsProvider;
@@ -40,7 +39,10 @@ internal sealed class OptionsProviderWithDefaults(
 	IDictionary<string, IConfigurationSource> sources,
 	Dictionary<string, string> altNameMapping) : IOptionsProvider
 {
-	public T? GetOptions<T>(string key, IReadOnlyCollection<string>? featureNames = null)
+	public T? GetOptions<T>(
+		string key,
+		IReadOnlyCollection<string>? featureNames = null,
+		MemoryCacheEntryOptions? cacheOptions = null)
 	{
 		// Valid the feature names and map their canonical names.
 		List<string>? mappedFeatureNames = null;
@@ -58,8 +60,13 @@ internal sealed class OptionsProviderWithDefaults(
 		}
 
 		var cacheKey = new CacheKey(key, mappedFeatureNames);
-		return (T?)cache.GetOrCreate(cacheKey, entry => {
-			// TODO entry.SetOptions(options);
+		return (T?)cache.GetOrCreate(cacheKey, entry =>
+		{
+			if (cacheOptions is not null)
+			{
+				entry.SetOptions(cacheOptions);
+			}
+
 			return this.GetOptionsInternal<T>(key, mappedFeatureNames);
 		});
 	}
