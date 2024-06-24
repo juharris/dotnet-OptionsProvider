@@ -3,6 +3,20 @@ Enables loading configurations from files to manage options for experiments or f
 
 <!-- TODO Add examples, DI examples, notes about disposal for the IMemoryCache. -->
 
+# Example
+Create a new folder for configurations files, for this example, we'll call it "Configurations".
+
+<!-- TODO Add more details. -->
+
+When setting up your `IServiceCollection`, do the following:
+
+```csharp
+services
+    // ...
+    .AddOptionsProvider("Configurations")
+```
+<!-- TODO Add details. -->
+
 # Development
 ## Code Formatting
 CI enforces:
