@@ -44,3 +44,10 @@ jobs:
       run: dotnet format --verify-no-changes --severity info --no-restore *.sln
     - name: Test
       run: dotnet test --no-build --verbosity normal --configuration Release *.sln
+    - name: Publish
+      if: github.ref == 'refs/heads/main'
+      run: |
+          set -ex
+          
+      env:
+        EMOGIT_NPM_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

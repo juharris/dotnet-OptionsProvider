@@ -161,7 +161,7 @@ dotnet format --severity info --no-restore src/*/*.sln
 ## Publishing
 From the dotnet folder in the root of the repo, run:
 ```bash
-$api_key=<your NuGet API key>
+api_key=<your NuGet API key>
 cd src/OptionsProvider
 dotnet pack --configuration Release
 dotnet nuget push OptionsProvider/bin/Release/OptionsProvider.*.nupkg  --source https://api.nuget.org/v3/index.json -k $api_key --skip-duplicate
