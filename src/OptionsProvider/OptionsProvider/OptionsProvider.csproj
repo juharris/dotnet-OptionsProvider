@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<PackageId>OptionsProvider</PackageId>
+		<Version>0.1.0</Version>
+		<Authors>Justin D. Harris</Authors>
+		<Nullable>enable</Nullable>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="../OptionsProvider.Core/OptionsProvider.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EditorConfigFiles Remove="../.editorconfig" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="../.editorconfig" />
+		<None Include="../../../README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+</Project>

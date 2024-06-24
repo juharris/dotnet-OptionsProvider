@@ -1,0 +1,18 @@
+{
+	"metadata": {
+		// This is an example that is also used in tests.
+		"isPersistent": true,
+		"owners": "Justin@site.com"
+	},
+	"options": {
+		"config": {
+			"array": [
+				"example item 1"
+			],
+			"object": {
+				"one": 1,
+				"two": 2
+			}
+		}
+	}
+}

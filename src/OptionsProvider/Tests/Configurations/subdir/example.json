@@ -1,0 +1,23 @@
+{
+	"metadata": {
+		// This is an example that is also used in tests.
+		"aliases": [
+			"sub_example"
+		],
+		"isPersistent": true,
+		"owners": "Justin@site.com"
+	},
+	"options": {
+		"config": {
+			"array": [
+				"sub_example item 1",
+				"sub_example item 2"
+			],
+			"object": {
+				"one": 11,
+				"two": 22,
+				"three": 3
+			}
+		}
+	}
+}
