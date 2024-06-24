@@ -5,9 +5,16 @@ Features:
 * **Each *feature flag* is represented by a JSON or YAML file** which contains options to override default configuration values when processing feature names, flight names, or experiment names in a request.
 Note that YAML support is still experimental and parsing may change.
 * **Reads separate files in parallel** to keep independent configurations clear and easily maintainable.
-* Supports clear files and **aliases** in files.
+* Supports clear file names and **aliases** for feature names.
 * Uses the same logic that `ConfigurationBuilder` uses to load files so that it's easy to understand as it's the same as how `appsettings*.json` files are loaded.
 * **Caching**: Built configuration objects are cached by default in `IMemoryCache` to avoiding rebuilding the same objects for the same feature names.
+
+# Installation
+```
+dotnet add package OptionsProvider
+```
+
+See in [NuGet](https://www.nuget.org/packages/OptionsProvider#readme-body-tab).
 
 # Example
 Suppose you have a class that you want to use to configure your logic:
@@ -139,7 +146,7 @@ class MyClass(IOptionsSnapshot<MyConfiguration> options)
 If `enabledFeatures` is `["A", "B"]`, then `MyConfiguration` will be built in this order:
 1. Apply the default values the injected `IConfiguration`, i.e. the values from `appsettings.json` under `"config"`.
 2. Apply the values from `Configurations/feature_A.json`.
-3. Apply the values from `Configurations/feature_B/initial.json`.
+3. Apply the values from `Configurations/feature_B/initial.yaml`.
 
 ## Caching
 `["A", "B"]` is treated the same as `["a", "FeAtuRe_B/iNiTiAl"]` because using an alias is equivalent to using the path to the file and names and aliases are case-insensitive.
@@ -161,7 +168,7 @@ dotnet format --severity info --no-restore src/*/*.sln
 ## Publishing
 From the dotnet folder in the root of the repo, run:
 ```bash
-$api_key=<your NuGet API key>
+api_key=<your NuGet API key>
 cd src/OptionsProvider
 dotnet pack --configuration Release
 dotnet nuget push OptionsProvider/bin/Release/OptionsProvider.*.nupkg  --source https://api.nuget.org/v3/index.json -k $api_key --skip-duplicate
