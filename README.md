@@ -2,7 +2,8 @@
 Enables loading configurations from files to manage options for experiments or flights.
 
 Features:
-* **Each *feature flag* is represented by a file** which contains options to override default configuration values when processing feature names, flight names, or experiment names in a request.
+* **Each *feature flag* is represented by a JSON or YAML file** which contains options to override default configuration values when processing feature names, flight names, or experiment names in a request.
+Note that YAML support is still experimental and parsing may change.
 * **Reads separate files in parallel** to keep independent configurations clear and easily maintainable.
 * Supports clear files and **aliases** in files.
 * Uses the same logic that `ConfigurationBuilder` uses to load files so that it's easy to understand as it's the same as how `appsettings*.json` files are loaded.
@@ -40,7 +41,7 @@ Suppose you have an `appsettings.json` like this to configure `MyConfiguration`:
 Now you want to start experimenting with different values deep within `MyConfiguration`.
 
 Create a **new** folder for configurations files, for this example, we'll call it `Configurations` and add some files to it.
-All `*.json` files (and eventually `*.yaml` files) in `Configurations` and any of its subdirectories will be loaded into memory.
+All `*.json`, `*.yaml`, and `*.yml` files in `Configurations` and any of its subdirectories will be loaded into memory.
 
 `Configurations/feature_A.json`:
 ```json
@@ -59,27 +60,21 @@ All `*.json` files (and eventually `*.yaml` files) in `Configurations` and any o
 }
 ```
 
-`Configurations/feature_B/initial.json`:
-```json
-{
-    "metadata": {
-        "aliases": [ "b" ],
-        "owners": "team-b@company.com"
-    },
-    "options": {
-        "config": {
-            "array": [
-                "different item 1",
-                "item 2"
-            ],
-            "object": {
-                "one": 11,
-                "two": 22,
-                "three": 3,
-            }
-        }
-    }
-}
+`Configurations/feature_B/initial.yaml`:
+```yaml
+metadata:
+    aliases:
+        - "b"
+    owners: "team-b@company.com"
+options:
+    config:
+        array:
+            - "different item 1"
+            - "item 2"
+        object:
+            one: 11
+            two: 22
+            three: 3
 ```
 
 When setting up your `IServiceCollection` for your service, do the following:
