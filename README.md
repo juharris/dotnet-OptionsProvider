@@ -2,10 +2,11 @@
 Enables loading configurations from files to manage options for experiments or flights.
 
 Features:
-* Load files which contain options to override configuration values when processing feature names, flight names, or experiment names in a request.
-* Use clear files in the repository.
-* Use separate files to keep independent configurations clear and easily maintainable.
-* Use the same logic that `ConfigurationBuilder` uses to load files so that it's easy to understand as it's the same as how `appsettings*.json` files are loaded.
+* **Each *feature flag* is represented by a file** which contains options to override default configuration values when processing feature names, flight names, or experiment names in a request.
+* **Reads separate files in parallel** to keep independent configurations clear and easily maintainable.
+* Supports clear files and **aliases** in files.
+* Uses the same logic that `ConfigurationBuilder` uses to load files so that it's easy to understand as it's the same as how `appsettings*.json` files are loaded.
+* **Caching**: Built configuration objects are cached by default in `IMemoryCache` to avoiding rebuilding the same objects for the same feature names.
 
 # Example
 Suppose you have a class that you want to use to configure your logic:
@@ -17,7 +18,8 @@ internal class MyConfiguration
 }
 ```
 
-You probably already have a default configuration in appsettings.json:
+You probably already use [Configuration in .NET](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration) and build an `IConfiguration` for to use in your service based on some default settings in an appsettings.json file.
+Suppose you have an `appsettings.json` like this to configure `MyConfiguration`:
 ```json
 {
     "config": {
@@ -28,13 +30,17 @@ You probably already have a default configuration in appsettings.json:
             "one": 1,
             "two": 2
         }
+    },
+    "another config": {
+        ...
     }
 }
 ```
 
 Now you want to start experimenting with different values deep within `MyConfiguration`.
 
-Create a new folder for configurations files, for this example, we'll call it "Configurations" and add some files to it.
+Create a **new** folder for configurations files, for this example, we'll call it `Configurations` and add some files to it.
+All `*.json` files (and eventually `*.yaml` files) in `Configurations` and any of its subdirectories will be loaded into memory.
 
 `Configurations/feature_A.json`:
 ```json
@@ -53,7 +59,7 @@ Create a new folder for configurations files, for this example, we'll call it "C
 }
 ```
 
-`Configurations/feature_B.json`:
+`Configurations/feature_B/initial.json`:
 ```json
 {
     "metadata": {
@@ -83,7 +89,9 @@ services
     .ConfigureOptions<MyConfiguration>("config")
 ```
 
-There are two simple ways to get the right `MyConfiguration` for the current request based on the enabled features.
+There are two simple ways to get the right version of `MyConfiguration` for the current request based on the enabled features.
+
+## Using `IOptionsProvider` Directly
 
 You can the inject `IOptionsProvider` into classes to get options for a given set of features.
 Features names are not case-sensitive.
@@ -101,6 +109,8 @@ class MyClass(IOptionsProvider optionsProvider)
     }
 }
 ```
+
+## Using `IOptionsSnapshot`
 
 Alternatively, you can also use `IOptionsSnapshot<MyConfiguration>` and follow [.NET's Options pattern](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/options).
 
@@ -130,6 +140,16 @@ class MyClass(IOptionsSnapshot<MyConfiguration> options)
     }
 }
 ```
+
+If `enabledFeatures` is `["A", "B"]`, then `MyConfiguration` will be built in this order:
+1. Apply the default values from `appsettings.json` under `"config"`.
+2. Apply the values from `Configurations/feature_A.json`.
+3. Apply the values from `Configurations/feature_B/initial.json`.
+
+## Caching
+`["A", "B"]` is treated the same as `["a", "FeAtuRe_B/iNiTiAl"]` because using an alias is equivalent to using the path to the file and names and aliases are case-insensitive.
+Both examples would retrieve the same instance from the cache and `IOptionsProvider` would return the same instance.
+If `IOptionsSnapshot<MyConfiguration>` then `MyConfiguration` will still only be built once and cached, but a different instance would be returned from `IOptionsSnapshot<MyConfiguration>.Value` because the options pattern creates a new instance each time.
 
 # Development
 ## Code Formatting
