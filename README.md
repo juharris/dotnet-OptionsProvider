@@ -8,7 +8,7 @@ Features:
 * Use the same logic that `ConfigurationBuilder` uses to load files so that it's easy to understand as it's the same as how `appsettings*.json` files are loaded.
 
 # Example
-Suppose you have a configuration class that you want to use to configure your logic:
+Suppose you have a class that you want to use to configure your logic:
 ```csharp
 internal class MyConfiguration
 {
@@ -17,37 +17,48 @@ internal class MyConfiguration
 }
 ```
 
-Create a new folder for configurations files, for this example, we'll call it "Configurations".
-
-Create some configuration files.
-
-Configurations/feature_A.json:
+You probably already have a default configuration in appsettings.json:
 ```json
 {
-    "metadata": {
-        "aliases": [ "a" ],
-        "owners": "justin@site.com"
-    },
-    "options": {
-        "config": {
-            "array": [
-                "example item 1"
-            ],
-            "object": {
-                "one": 1,
-                "two": 2
-            }
+    "config": {
+        "array": [
+            "default item 1"
+        ],
+        "object": {
+            "one": 1,
+            "two": 2
         }
     }
 }
 ```
 
-Configurations/feature_B.json:
+Now you want to start experimenting with different values deep within `MyConfiguration`.
+
+Create a new folder for configurations files, for this example, we'll call it "Configurations" and add some files to it.
+
+`Configurations/feature_A.json`:
+```json
+{
+    "metadata": {
+        "aliases": [ "a" ],
+        "owners": "a-team@company.com"
+    },
+    "options": {
+        "config": {
+            "array": [
+                "example item 1"
+            ]
+        }
+    }
+}
+```
+
+`Configurations/feature_B.json`:
 ```json
 {
     "metadata": {
         "aliases": [ "b" ],
-        "owners": "justin@site.com"
+        "owners": "team-b@company.com"
     },
     "options": {
         "config": {
@@ -65,13 +76,14 @@ Configurations/feature_B.json:
 }
 ```
 
-When setting up your `IServiceCollection`, do the following:
+When setting up your `IServiceCollection` for your service, do the following:
 ```csharp
 services
-    // ...
     .AddOptionsProvider("Configurations")
     .ConfigureOptions<MyConfiguration>("config")
 ```
+
+There are two simple ways to get the right `MyConfiguration` for the current request based on the enabled features.
 
 You can the inject `IOptionsProvider` into classes to get options for a given set of features.
 Features names are not case-sensitive.
@@ -84,32 +96,36 @@ class MyClass(IOptionsProvider optionsProvider)
     void DoSomething(...)
     {
         MyConfiguration options = optionsProvider.GetOptions<MyConfiguration>("config", ["A"]);
-        // `options` will contain the values from Configurations/feature_A.json
+        // `options` be a result of merging the default values from appsettings.json, then applying Configurations/feature_A.json
         // because "a" is an alias for feature_A.json and aliases are case-insensitive.
     }
 }
 ```
 
-You can also use `IOptionsSnapshot<MyConfiguration>` and follow [.NET's Options pattern](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/options).
+Alternatively, you can also use `IOptionsSnapshot<MyConfiguration>` and follow [.NET's Options pattern](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/options).
 
 When a request starts, set the feature names based on the enabled features in your system (for example, the enabled features could be passed in a request body or from headers):
 ```csharp
+using OptionsProvider;
+
 class MyController(IFeaturesContext context)
 {
     public void InitializeContext(string[] enabledFeatures)
     {
-        context = enabledFeatures;
+        context.FeatureNames = enabledFeatures;
     }
 }
 ```
 
+Then while processing the request, `IFeaturesContext` will automatically be used to get the right configuration for the current request based on the enabled features.
+To use this method, `MyConfiguration` must have public setters for all of its properties.
 
+In your code, you can use `IOptionsSnapshot<MyConfiguration>` to get the right configuration for the current request based on the enabled features:
 ```csharp
 class MyClass(IOptionsSnapshot<MyConfiguration> options)
 {
     void DoSomething(...)
     {
-        // Get the right configuration for the current request based on the enabled features.
         MyConfiguration options = options.Value;
     }
 }
