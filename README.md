@@ -26,7 +26,7 @@ internal class MyConfiguration
 }
 ```
 
-You probably already use [Configuration in .NET](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration) and build an `IConfiguration` for to use in your service based on some default settings in an appsettings.json file.
+You probably already use [Configuration in .NET](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration) and build an `IConfiguration` to use in your service based on some default settings in an appsettings.json file.
 Suppose you have an `appsettings.json` like this to configure `MyConfiguration`:
 ```json
 {
@@ -94,7 +94,6 @@ services
 There are two simple ways to get the right version of `MyConfiguration` for the current request based on the enabled features.
 
 ## Using `IOptionsProvider` Directly
-
 You can the inject `IOptionsProvider` into classes to get options for a given set of features.
 Features names are not case-sensitive.
 
@@ -113,7 +112,6 @@ class MyClass(IOptionsProvider optionsProvider)
 ```
 
 ## Using `IOptionsSnapshot`
-
 Alternatively, you can also use `IOptionsSnapshot<MyConfiguration>` and follow [.NET's Options pattern](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/options).
 
 When a request starts, set the feature names based on the enabled features in your system (for example, the enabled features could be passed in a request body or from headers):
@@ -152,6 +150,26 @@ If `enabledFeatures` is `["A", "B"]`, then `MyConfiguration` will be built in th
 `["A", "B"]` is treated the same as `["a", "FeAtuRe_B/iNiTiAl"]` because using an alias is equivalent to using the path to the file and names and aliases are case-insensitive.
 Both examples would retrieve the same instance from the cache and `IOptionsProvider` would return the same instance.
 If `IOptionsSnapshot<MyConfiguration>` is used, then `MyConfiguration` will still only be built once and cached, but a different instance would be returned from `IOptionsSnapshot<MyConfiguration>.Value` for each scope because the options pattern creates a new instance each time.
+
+## Configuration in .csproj Files
+To ensure that the latest configuration files are used when running your service or tests, you **may** need to ensure the `Configuration` folder gets copied to the output folder.
+In your .csproj files with the `Configurations` folder, add a section like:
+```csproj
+<ItemGroup>
+  <Content Include="Configurations/**">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </Content>
+</ItemGroup>
+```
+
+or there are already rule about including files, but the configuration file for a feature isn't found, you can try:
+```csproj
+<ItemGroup>
+  <None Include="Configurations/**">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+</ItemGroup>
+```
 
 # Development
 ## Code Formatting
