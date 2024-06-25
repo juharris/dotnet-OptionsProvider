@@ -32,10 +32,10 @@
 		<None Include="*.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<Content Include="Configurations\**">
+		<Content Include="Configurations/**">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Include="InvalidConfigurations\**">
+		<Content Include="InvalidConfigurations/**">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
