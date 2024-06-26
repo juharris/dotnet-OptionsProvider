@@ -14,7 +14,7 @@ Note that YAML support is still experimental and parsing may change.
 dotnet add package OptionsProvider
 ```
 
-See in [NuGet](https://www.nuget.org/packages/OptionsProvider#readme-body-tab).
+See more at [NuGet.org](https://www.nuget.org/packages/OptionsProvider#readme-body-tab).
 
 # Example
 Suppose you have a class that you want to use to configure your logic:
@@ -151,7 +151,7 @@ If `enabledFeatures` is `["A", "B"]`, then `MyConfiguration` will be built in th
 Both examples would retrieve the same instance from the cache and `IOptionsProvider` would return the same instance.
 If `IOptionsSnapshot<MyConfiguration>` is used, then `MyConfiguration` will still only be built once and cached, but a different instance would be returned from `IOptionsSnapshot<MyConfiguration>.Value` for each scope because the options pattern creates a new instance each time.
 
-## Configuration in .csproj Files
+## Preserving Configuration Files
 To ensure that the latest configuration files are used when running your service or tests, you **may** need to ensure the `Configuration` folder gets copied to the output folder.
 In your .csproj files with the `Configurations` folder, add a section like:
 ```csproj
@@ -170,6 +170,47 @@ or there are already rule about including files, but the configuration file for 
   </None>
 </ItemGroup>
 ```
+
+## Configuration Building Examples
+### Arrays/Lists
+Note that `ConfigurationBuilder` does not concatenate lists, it merges them and overwrites entries because it treats each item in a list like a value in a dictionary indexed by the item's index.
+
+For example, if the following features are applied:
+
+`Configurations/feature_A.yaml`:
+```yaml
+options:
+  config:
+    array:
+      - 1
+      - 2
+```
+
+`Configurations/feature_B.yaml`:
+```yaml
+options:
+  config:
+    array:
+      - 3
+```
+
+The resulting `MyConfiguration` for `["feature_A", "feature_B"]` will have `array` set to `[3, 2]` because the second list is applied 'on top of' the first list.
+The builder views the lists as:
+
+`array` from `Configurations/feature_A.yaml`:\
+`array:0` = `1`\
+`array:1` = `2`
+
+`array` from `Configurations/feature_B.yaml`:\
+`array:0` = `3`
+
+so the merged result is:\
+`array:0` = `3`\
+`array:1` = `2`
+
+So `array` becomes `[3, 2]`.
+
+For more details, see [here](https://stackoverflow.com/questions/67196795/configurationbuilder-does-not-override-node-when-adding-another-json-fill).
 
 # Development
 ## Code Formatting
