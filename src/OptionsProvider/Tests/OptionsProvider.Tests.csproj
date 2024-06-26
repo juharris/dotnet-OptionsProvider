@@ -39,8 +39,4 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
-
-	<ItemGroup>
-	  <None Remove="Configurations\deeper_example2.yaml" />
-	</ItemGroup>
 </Project>
