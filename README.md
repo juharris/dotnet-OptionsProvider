@@ -173,9 +173,10 @@ or there are already rule about including files, but the configuration file for 
 
 ## Configuration Building Examples
 ### Arrays/Lists
-Note that `ConfigurationBuilder` does not concatenate lists, it merges them and potential overwrites entries because it treats each item in a list like a value in a dictionary indexed by the item's index.
+Note that `ConfigurationBuilder` does not concatenate lists, it merges them and overwrites entries because it treats each item in a list like a value in a dictionary indexed by the item's index.
 
 For example, if the following features are applied:
+
 `Configurations/feature_A.yaml`:
 ```yaml
 options:
@@ -193,7 +194,21 @@ options:
       - 3
 ```
 
-The resulting `MyConfiguration` will have `Array` set to `[3, 2]` because the second list is merged with the first list and the second list overwrites the first list's first item.
+The resulting `MyConfiguration` for `["feature_A", "feature_B"]` will have `array` set to `[3, 2]` because the second list is applied 'on top of' the first list.
+The builder views the lists as:
+
+`array` from `Configurations/feature_A.yaml`:\
+`array:0` = `1`\
+`array:1` = `2`
+
+`array` from `Configurations/feature_B.yaml`:\
+`array:0` = `3`
+
+so the merged result is:\
+`array:0` = `3`\
+`array:1` = `2`
+
+So `array` becomes `[3, 2]`.
 
 For more details, see [here](https://stackoverflow.com/questions/67196795/configurationbuilder-does-not-override-node-when-adding-another-json-fill).
 
