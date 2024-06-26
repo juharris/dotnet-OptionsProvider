@@ -1,0 +1,22 @@
+metadata:
+    aliases:
+        - deeper2
+    # This is an example that is also used in tests.
+    isPersistent: true
+    owners: Justin@site.com
+options:
+    config:
+        deeperObject:
+            object:
+                three: 33
+            objects:
+                - isEnabled: false
+                  object:
+                      one: 11
+                - name: "obj 2 2"
+        deeperObjects:
+            - name: "obj A 2"
+              isEnabled: false
+              object:
+                  one: 111
+                  three: 333

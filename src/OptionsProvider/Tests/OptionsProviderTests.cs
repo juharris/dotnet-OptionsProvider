@@ -122,4 +122,95 @@ public class OptionsProviderTests
 		var config = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["sub_example", "example"]);
 		config.Should().BeEquivalentTo(expected);
 	}
+
+
+	[TestMethod]
+	public void Test_GetOptions_Deeper()
+	{
+		var expectedDeeper = new MyConfiguration()
+		{
+			Array = ["item 1"],
+			Object = new MyObject { One = 1, Two = 2.0 },
+			DeeperObject = new()
+			{
+				Name = "wtv",
+				IsEnabled = true,
+				Object = new MyObject { One = 1, Three = 3 },
+				Objects =
+				[
+					new()
+					{
+						Name = "obj1",
+						IsEnabled = true,
+						Object = new MyObject { One = 1, Two = 2.0 },
+					},
+					new()
+					{
+						Name = "obj2",
+						IsEnabled = false,
+						Object = new MyObject { One = 1, Three = 3 },
+					},
+				]
+			},
+			DeeperObjects = [
+				new()
+				{
+					Name = "obj A",
+					IsEnabled = true,
+					Object = new MyObject { One = 11, Two = 22 },
+				},
+				new()
+				{
+					Name = "obj B",
+					IsEnabled = false,
+					Object = new MyObject { One = 1, Three = 3 },
+				},
+			],
+		};
+		var config = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["deePer"]);
+		config.Should().BeEquivalentTo(expectedDeeper);
+
+		var expectedDeeper2 = new MyConfiguration()
+		{
+			Array = ["item 1"],
+			Object = new MyObject { One = 1, Two = 2.0 },
+			DeeperObject = new()
+			{
+				Name = "wtv",
+				IsEnabled = true,
+				Object = new MyObject { One = 1, Three = 33 },
+				Objects =
+				[
+					new()
+					{
+						Name = "obj1",
+						IsEnabled = false,
+						Object = new MyObject { One = 11, Two = 2.0 },
+					},
+					new()
+					{
+						Name = "obj 2 2",
+						IsEnabled = false,
+						Object = new MyObject { One = 1, Three = 3 },
+					},
+				]
+			},
+			DeeperObjects = [
+				new()
+				{
+					Name = "obj A 2",
+					IsEnabled = false,
+					Object = new MyObject { One = 111, Two = 22, Three = 333 },
+				},
+				new()
+				{
+					Name = "obj B",
+					IsEnabled = false,
+					Object = new MyObject { One = 1, Three = 3 },
+				},
+			],
+		};
+		config = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["deePer", "DEEPER2"]);
+		config.Should().BeEquivalentTo(expectedDeeper2);
+	}
 }

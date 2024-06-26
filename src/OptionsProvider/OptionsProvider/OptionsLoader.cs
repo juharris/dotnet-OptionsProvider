@@ -58,11 +58,11 @@ public sealed class OptionsLoader(
 
 			if (fileConfig.Metadata.Aliases is not null)
 			{
-				foreach (var alternativeName in fileConfig.Metadata.Aliases)
+				foreach (var alias in fileConfig.Metadata.Aliases)
 				{
-					if (!altNameMapping.TryAdd(alternativeName, name))
+					if (!altNameMapping.TryAdd(alias, name))
 					{
-						throw new InvalidOperationException($"The name \"{name}\" for the configuration file \"{configPath}\" is already used.");
+						throw new InvalidOperationException($"The alias name \"{alias}\" for the configuration file \"{configPath}\" is already used.");
 					}
 				}
 			}
