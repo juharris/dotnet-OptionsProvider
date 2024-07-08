@@ -140,8 +140,7 @@ public sealed class OptionsProviderBuilder(
 				int index = 0;
 				foreach (var item in element.EnumerateArray())
 				{
-					RecurseJsonElement(item, $"{keyPrefix}{index}:", mapping);
-					++index;
+					RecurseJsonElement(item, $"{keyPrefix}{index++}:", mapping);
 				}
 				break;
 			case JsonValueKind.String:
