@@ -20,11 +20,12 @@ public static class ServiceCollectionExtensions
 		string path)
 	{
 		services.AddMemoryCache();
-		services.AddSingleton<IOptionsLoader, OptionsLoader>();
-		services.AddSingleton(serviceProvider =>
+		services.AddTransient<IOptionsProviderBuilder, OptionsProviderBuilder>();
+		services.AddSingleton<IOptionsProvider>(serviceProvider =>
 		{
-			var loader = serviceProvider.GetRequiredService<IOptionsLoader>();
-			return loader.LoadAsync(path).Result;
+			var builder = serviceProvider.GetRequiredService<IOptionsProviderBuilder>();
+			builder.AddDirectoryAsync(path).Wait();
+			return builder.Build();
 		});
 
 		services.AddScoped<IFeaturesContext, FeaturesContext>();

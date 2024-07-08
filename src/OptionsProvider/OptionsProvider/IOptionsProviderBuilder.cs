@@ -3,7 +3,7 @@
 /// <summary>
 /// Loads options from files.
 /// </summary>
-public interface IOptionsLoader
+public interface IOptionsProviderBuilder
 {
 	/// <summary>
 	/// Loads and options from files in parallel.
@@ -13,6 +13,11 @@ public interface IOptionsLoader
 	/// <remarks>
 	/// Currently "*.json", "*.yaml", and "*.yml" files are supported.
 	/// </remarks>
-	Task<IOptionsProvider> LoadAsync(
-		string rootPath);
+	Task<IOptionsProviderBuilder> AddDirectoryAsync(string rootPath);
+
+	/// <summary>
+	/// Finishes building the provider.
+	/// </summary>
+	/// <returns>The built provider.</returns>
+	IOptionsProvider Build();
 }

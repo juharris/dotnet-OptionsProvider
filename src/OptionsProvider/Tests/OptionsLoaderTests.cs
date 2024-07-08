@@ -48,9 +48,8 @@ public class OptionsLoaderTests
 	[TestMethod]
 	public async Task Test_LoadAsync_with_Existing_Name()
 	{
-		using var cache = new MemoryCache(new MemoryCacheOptions());
-		var loader = new OptionsLoader(new ConfigurationBuilder().Build(), cache);
-		var action = () => loader.LoadAsync("InvalidConfigurations");
+		var builder = ServiceProvider.GetRequiredService<IOptionsProviderBuilder>();
+		var action = () => builder.AddDirectoryAsync("InvalidConfigurations");
 		await action.Should().ThrowAsync<InvalidOperationException>()
 			.WithMessage($"The name \"other example\" for the configuration file \"{Path.Combine("InvalidConfigurations", "other example.json")}\" is already used.");
 	}
