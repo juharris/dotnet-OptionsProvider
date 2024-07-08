@@ -33,6 +33,13 @@ public sealed class OptionsProviderBuilder(
 	private readonly Dictionary<string, IConfigurationSource> sourcesMapping = new(StringComparer.OrdinalIgnoreCase);
 
 	/// <inheritdoc/>
+	public IOptionsProviderBuilder AddConfigurationSource(string featureName, IConfigurationSource configurationSource)
+	{
+		this.sourcesMapping[featureName] = configurationSource;
+		return this;
+	}
+
+	/// <inheritdoc/>
 	public async Task<IOptionsProviderBuilder> AddDirectoryAsync(string rootPath)
 	{
 		var paths = Directory.EnumerateFiles(rootPath, "*.json", SearchOption.AllDirectories)
@@ -55,7 +62,7 @@ public sealed class OptionsProviderBuilder(
 				throw new InvalidOperationException($"The name \"{name}\" for the configuration file \"{configPath}\" is already used.");
 			}
 
-			this.sourcesMapping[name] = fileConfig.Source;
+			this.AddConfigurationSource(name, fileConfig.Source);
 
 			if (fileConfig.Metadata.Aliases is not null)
 			{
