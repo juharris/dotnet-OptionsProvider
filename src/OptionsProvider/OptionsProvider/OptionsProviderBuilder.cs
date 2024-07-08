@@ -29,15 +29,14 @@ public sealed class OptionsProviderBuilder(
 					.JsonCompatible()
 					.Build();
 
+	/// <summary>
+	/// A mapping from alias to feature name.
+	/// </summary>
 	private readonly Dictionary<string, string> altNameMapping = new(StringComparer.OrdinalIgnoreCase);
+	/// <summary>
+	/// A mapping from feature name to the configuration for the feature.
+	/// </summary>
 	private readonly Dictionary<string, IConfigurationSource> sourcesMapping = new(StringComparer.OrdinalIgnoreCase);
-
-	/// <inheritdoc/>
-	public IOptionsProviderBuilder AddConfigurationSource(string featureName, IConfigurationSource configurationSource)
-	{
-		this.sourcesMapping[featureName] = configurationSource;
-		return this;
-	}
 
 	/// <inheritdoc/>
 	public async Task<IOptionsProviderBuilder> AddDirectoryAsync(string rootPath)
@@ -62,7 +61,7 @@ public sealed class OptionsProviderBuilder(
 				throw new InvalidOperationException($"The name \"{name}\" for the configuration file \"{configPath}\" is already used.");
 			}
 
-			this.AddConfigurationSource(name, fileConfig.Source);
+			this.sourcesMapping[name] = fileConfig.Source;
 
 			if (fileConfig.Metadata.Aliases is not null)
 			{
@@ -83,6 +82,21 @@ public sealed class OptionsProviderBuilder(
 	public IOptionsProvider Build()
 	{
 		return new OptionsProviderWithDefaults(baseConfiguration, cache, this.sourcesMapping, this.altNameMapping);
+	}
+
+	/// <inheritdoc/>
+	public IOptionsProviderBuilder SetAlias(string alias, string featureName)
+	{
+		this.altNameMapping[alias] = featureName;
+		return this;
+	}
+
+	/// <inheritdoc/>
+	public IOptionsProviderBuilder SetConfigurationSource(string featureName, IConfigurationSource configurationSource)
+	{
+		this.SetAlias(featureName, featureName);
+		this.sourcesMapping[featureName] = configurationSource;
+		return this;
 	}
 
 	private static async Task<FileConfig> LoadFileAsync(string rootPath, string path)

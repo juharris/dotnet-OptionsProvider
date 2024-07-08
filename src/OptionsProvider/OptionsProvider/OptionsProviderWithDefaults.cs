@@ -47,7 +47,7 @@ internal sealed class OptionsProviderWithDefaults(
 	IConfiguration baseConfiguration,
 	IMemoryCache cache,
 	IDictionary<string, IConfigurationSource> sources,
-	Dictionary<string, string> altNameMapping) : IOptionsProvider
+	IDictionary<string, string> altNameMapping) : IOptionsProvider
 {
 	public T? GetOptions<T>(
 		string key,
@@ -61,7 +61,7 @@ internal sealed class OptionsProviderWithDefaults(
 			mappedFeatureNames = new List<string>(featureNames.Count);
 			foreach (var featureName in featureNames)
 			{
-				if (!altNameMapping.TryGetValue(featureName, out string? canonicalFeatureName))
+				if (!altNameMapping.TryGetValue(featureName, out var canonicalFeatureName))
 				{
 					throw new InvalidOperationException($"The given feature name \"{featureName}\" is not a known feature.");
 				}
