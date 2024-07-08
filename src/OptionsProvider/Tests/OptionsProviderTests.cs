@@ -87,12 +87,28 @@ public class OptionsProviderTests
 
 		// Test with IOptionsSnapshot.
 		// Putting all tests for "example" in one method to avoid concurrency issues.
+		MyConfiguration scope1Config, scope2Config;
 		{
 			using var scope = OptionsLoaderTests.ServiceProvider.CreateScope();
 			var featuresContext = scope.ServiceProvider.GetRequiredService<IFeaturesContext>();
 			featuresContext.FeatureNames = ["example"];
-			var config = scope.ServiceProvider.GetRequiredService<IOptionsSnapshot<MyConfiguration>>().Value;
-			config.Should().BeEquivalentTo(ExampleMyConfiguration);
+			scope1Config = scope.ServiceProvider.GetRequiredService<IOptionsSnapshot<MyConfiguration>>().Value;
+			scope1Config.Should().BeEquivalentTo(ExampleMyConfiguration);
+		}
+
+		{
+			using var scope = OptionsLoaderTests.ServiceProvider.CreateScope();
+			var featuresContext = scope.ServiceProvider.GetRequiredService<IFeaturesContext>();
+			featuresContext.FeatureNames = ["eXamplE"];
+			scope2Config = scope.ServiceProvider.GetRequiredService<IOptionsSnapshot<MyConfiguration>>().Value;
+			scope2Config.Should().BeEquivalentTo(ExampleMyConfiguration);
+		}
+
+		// scope1Config and scope2Config won't be the same instance because the Options pattern .NET logic creates a new instance for each scope.
+		Assert.AreNotSame(scope1Config, scope2Config);
+		foreach (var prop in scope1Config.GetType().GetProperties())
+		{
+			Assert.AreSame(prop.GetValue(scope1Config), prop.GetValue(scope2Config));
 		}
 	}
 
@@ -123,6 +139,41 @@ public class OptionsProviderTests
 		config.Should().BeEquivalentTo(expected);
 	}
 
+	[TestMethod]
+	public void Test_GetOptions_Not_Cached()
+	{
+		// Test with IOptionsSnapshot.
+		NonCachedConfiguration scope1Config, scope2Config;
+		{
+			using var scope = OptionsLoaderTests.ServiceProvider.CreateScope();
+			scope1Config = scope.ServiceProvider.GetRequiredService<IOptionsSnapshot<NonCachedConfiguration>>().Value;
+			scope1Config.Should().BeEquivalentTo(DefaultMyConfiguration);
+		}
+
+		{
+			using var scope = OptionsLoaderTests.ServiceProvider.CreateScope();
+			scope2Config = scope.ServiceProvider.GetRequiredService<IOptionsSnapshot<NonCachedConfiguration>>().Value;
+			scope2Config.Should().BeEquivalentTo(DefaultMyConfiguration);
+		}
+
+		// scope1Config and scope2Config won't be the same instance because the Options pattern .NET logic creates a new instance for each scope.
+		Assert.AreNotSame(scope1Config, scope2Config);
+		foreach (var prop in scope1Config.GetType().GetProperties())
+		{
+			var val1 = prop.GetValue(scope1Config);
+			var val2 = prop.GetValue(scope2Config);
+			if (val1 is not null)
+			{
+				Assert.IsNotNull(val2);
+				Assert.AreNotSame(val1, val2, "Values for `{0}` were not the same instance.", prop.Name);
+			}
+			else
+			{
+				Assert.IsNull(val2);
+			}
+
+		}
+	}
 
 	[TestMethod]
 	public void Test_GetOptions_Deeper()

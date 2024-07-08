@@ -26,6 +26,12 @@ public class OptionsLoaderTests
 			.AddSingleton<IConfiguration>(configuration)
 			.AddOptionsProvider("Configurations")
 			.ConfigureOptions<MyConfiguration>("config")
+			.ConfigureOptions<NonCachedConfiguration>(
+			"nonCachedConfig",
+			_ => new MemoryCacheEntryOptions
+			{
+				AbsoluteExpiration = DateTime.MinValue,
+			})
 			.BuildServiceProvider();
 		OptionsProvider = ServiceProvider.GetRequiredService<IOptionsProvider>();
 	}

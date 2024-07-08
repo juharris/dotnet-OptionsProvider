@@ -15,8 +15,8 @@ public sealed class OptionsLoader(
 {
 	private static readonly JsonSerializerOptions DeserializationOptions = new()
 	{
-		PropertyNameCaseInsensitive = true,
 		AllowTrailingCommas = true,
+		PropertyNameCaseInsensitive = true,
 		ReadCommentHandling = JsonCommentHandling.Skip,
 	};
 
