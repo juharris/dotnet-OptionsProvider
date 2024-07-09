@@ -8,7 +8,7 @@ public sealed class CacheOptionsBuilderInput
 	/// <summary>
 	/// The path to the options in the configurations.
 	/// </summary>
-	public string? OptionsKey { get; init; }
+	public required string OptionsKey { get; init; }
 
 	/// <summary>
 	/// Indicates the features that are enabled for the current scope.
