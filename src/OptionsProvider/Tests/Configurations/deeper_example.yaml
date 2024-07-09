@@ -18,6 +18,7 @@ options:
                   object:
                       one: 1
                       two: 2
+                      three: null
                 - name: "obj2"
                   isEnabled: false
                   object:

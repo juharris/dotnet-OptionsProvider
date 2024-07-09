@@ -4,13 +4,23 @@ using Microsoft.Extensions.Configuration;
 namespace OptionsProvider;
 
 internal sealed record class CacheKey(
-	string ConfigKey,
+	string OptionsKey,
 	List<string>? FeatureNames)
 {
 	public bool Equals(CacheKey? other)
 	{
-		// Assume other is not `null` and they will not be the same reference.
-		return this.ConfigKey == other!.ConfigKey
+		if (ReferenceEquals(this, other))
+		{
+			return true;
+		}
+
+		if (other is null)
+		{
+			return false;
+		}
+
+
+		return this.OptionsKey == other.OptionsKey
 			// Assume there will usually be features and check for equality first.
 			&& ((this.FeatureNames is not null && other.FeatureNames is not null
 				&& this.FeatureNames.SequenceEqual(other.FeatureNames))
@@ -21,7 +31,7 @@ internal sealed record class CacheKey(
 	public override int GetHashCode()
 	{
 		var hash = new HashCode();
-		hash.Add(this.ConfigKey);
+		hash.Add(this.OptionsKey);
 		if (this.FeatureNames is not null)
 		{
 			foreach (var featureName in this.FeatureNames)
@@ -37,7 +47,7 @@ internal sealed class OptionsProviderWithDefaults(
 	IConfiguration baseConfiguration,
 	IMemoryCache cache,
 	IDictionary<string, IConfigurationSource> sources,
-	Dictionary<string, string> altNameMapping) : IOptionsProvider
+	IDictionary<string, string> altNameMapping) : IOptionsProvider
 {
 	public T? GetOptions<T>(
 		string key,
@@ -51,7 +61,7 @@ internal sealed class OptionsProviderWithDefaults(
 			mappedFeatureNames = new List<string>(featureNames.Count);
 			foreach (var featureName in featureNames)
 			{
-				if (!altNameMapping.TryGetValue(featureName, out string? canonicalFeatureName))
+				if (!altNameMapping.TryGetValue(featureName, out var canonicalFeatureName))
 				{
 					throw new InvalidOperationException($"The given feature name \"{featureName}\" is not a known feature.");
 				}

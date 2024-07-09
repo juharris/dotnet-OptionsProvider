@@ -8,15 +8,15 @@ namespace OptionsProvider;
 /// <summary>
 /// Simple options loader.
 /// </summary>
-public sealed class OptionsLoader(
+public sealed class OptionsProviderBuilder(
 	IConfiguration baseConfiguration,
 	IMemoryCache cache)
-	: IOptionsLoader
+	: IOptionsProviderBuilder
 {
 	private static readonly JsonSerializerOptions DeserializationOptions = new()
 	{
-		PropertyNameCaseInsensitive = true,
 		AllowTrailingCommas = true,
+		PropertyNameCaseInsensitive = true,
 		ReadCommentHandling = JsonCommentHandling.Skip,
 	};
 
@@ -29,8 +29,17 @@ public sealed class OptionsLoader(
 					.JsonCompatible()
 					.Build();
 
+	/// <summary>
+	/// A mapping from alias to feature name.
+	/// </summary>
+	private readonly Dictionary<string, string> altNameMapping = new(StringComparer.OrdinalIgnoreCase);
+	/// <summary>
+	/// A mapping from feature name to the configuration for the feature.
+	/// </summary>
+	private readonly Dictionary<string, IConfigurationSource> sourcesMapping = new(StringComparer.OrdinalIgnoreCase);
+
 	/// <inheritdoc/>
-	public async Task<IOptionsProvider> LoadAsync(string rootPath)
+	public async Task<IOptionsProviderBuilder> AddDirectoryAsync(string rootPath)
 	{
 		var paths = Directory.EnumerateFiles(rootPath, "*.json", SearchOption.AllDirectories)
 			.Concat(Directory.EnumerateFiles(rootPath, "*.yaml", SearchOption.AllDirectories))
@@ -42,25 +51,23 @@ public sealed class OptionsLoader(
 		var fileConfigs = await Task.WhenAll(paths
 			.Select(filePath => LoadFileAsync(rootPath, filePath))
 			.ToArray());
-		var altNameMapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-		var sourcesMapping = new Dictionary<string, IConfigurationSource>(StringComparer.OrdinalIgnoreCase);
 		foreach (var (configPath, fileConfig) in paths.Zip(fileConfigs))
 		{
 			var name = fileConfig.Metadata.Name!;
 
 			// Provide a canonical case-insensitive name for the configuration which also simplifies mapping alternative names to the canonical name.
-			if (!altNameMapping.TryAdd(name, name))
+			if (!this.altNameMapping.TryAdd(name, name))
 			{
 				throw new InvalidOperationException($"The name \"{name}\" for the configuration file \"{configPath}\" is already used.");
 			}
 
-			sourcesMapping[name] = fileConfig.Source;
+			this.sourcesMapping[name] = fileConfig.Source;
 
 			if (fileConfig.Metadata.Aliases is not null)
 			{
 				foreach (var alias in fileConfig.Metadata.Aliases)
 				{
-					if (!altNameMapping.TryAdd(alias, name))
+					if (!this.altNameMapping.TryAdd(alias, name))
 					{
 						throw new InvalidOperationException($"The alias name \"{alias}\" for the configuration file \"{configPath}\" is already used.");
 					}
@@ -68,7 +75,28 @@ public sealed class OptionsLoader(
 			}
 		}
 
-		return new OptionsProviderWithDefaults(baseConfiguration, cache, sourcesMapping, altNameMapping);
+		return this;
+	}
+
+	/// <inheritdoc/>
+	public IOptionsProvider Build()
+	{
+		return new OptionsProviderWithDefaults(baseConfiguration, cache, this.sourcesMapping, this.altNameMapping);
+	}
+
+	/// <inheritdoc/>
+	public IOptionsProviderBuilder SetAlias(string alias, string featureName)
+	{
+		this.altNameMapping[alias] = featureName;
+		return this;
+	}
+
+	/// <inheritdoc/>
+	public IOptionsProviderBuilder SetConfigurationSource(string featureName, IConfigurationSource configurationSource)
+	{
+		this.SetAlias(featureName, featureName);
+		this.sourcesMapping[featureName] = configurationSource;
+		return this;
 	}
 
 	private static async Task<FileConfig> LoadFileAsync(string rootPath, string path)
@@ -133,8 +161,7 @@ public sealed class OptionsLoader(
 				int index = 0;
 				foreach (var item in element.EnumerateArray())
 				{
-					RecurseJsonElement(item, $"{keyPrefix}{index}:", mapping);
-					++index;
+					RecurseJsonElement(item, $"{keyPrefix}{index++}:", mapping);
 				}
 				break;
 			case JsonValueKind.String:
