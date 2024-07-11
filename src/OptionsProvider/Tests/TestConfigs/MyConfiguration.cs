@@ -20,8 +20,8 @@ internal sealed class MyObject
 
 internal sealed class MyDeeperObject
 {
-	public string? Name { get; set; }
-	public bool IsEnabled { get; set; }
-	public MyObject? Object { get; set; }
-	public MyDeeperObject[]? Objects { get; set; }
+	public string? Name { get; init; }
+	public bool IsEnabled { get; init; }
+	public MyObject? Object { get; init; }
+	public MyDeeperObject[]? Objects { get; init; }
 }
