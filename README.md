@@ -19,7 +19,7 @@ See more at [NuGet.org](https://www.nuget.org/packages/OptionsProvider#readme-bo
 # Example
 Suppose you have a class that you want to use to configure your logic:
 ```csharp
-internal class MyConfiguration
+internal sealed class MyConfiguration
 {
     public string[]? Array { get; set; }
     public MyObject? Object { get; set; }

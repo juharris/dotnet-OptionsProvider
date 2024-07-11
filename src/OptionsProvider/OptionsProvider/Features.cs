@@ -11,7 +11,7 @@ public interface IFeaturesContext
 	IReadOnlyList<string>? FeatureNames { get; set; }
 }
 
-internal class FeaturesContext : IFeaturesContext
+internal sealed class FeaturesContext : IFeaturesContext
 {
 	public IReadOnlyList<string>? FeatureNames { get; set; }
 }

@@ -19,7 +19,7 @@ public sealed class OptionsMetadata
 	/// <remarks>
 	/// This is helpful for using custom short names for the group of options.
 	/// </remarks>
-	public string[]? Aliases { get; set; }
+	public string[]? Aliases { get; init; }
 
 	/// <summary>
 	/// The creators or maintainers of this group of options.
@@ -27,16 +27,16 @@ public sealed class OptionsMetadata
 	/// <remarks>
 	/// For example, emails separated by ";".
 	/// </remarks>
-	public required string Owners { get; set; }
+	public required string Owners { get; init; }
 
 	/// <summary>
 	/// A date before which the options can be used.
 	/// After this date, this group of options might not be supported and should be considered for deletion.
 	/// </summary>
-	public DateTime? BestBeforeDate { get; set; }
+	public DateTime? BestBeforeDate { get; init; }
 
 	/// <summary>
 	/// Indicates if this group of options is expected to be supported for a long time.
 	/// </summary>
-	public bool IsPersistent { get; set; }
+	public bool IsPersistent { get; init; }
 }
