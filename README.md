@@ -21,8 +21,8 @@ Suppose you have a class that you want to use to configure your logic:
 ```csharp
 internal sealed class MyConfiguration
 {
-    public string[]? Array { get; set; }
-    public MyObject? Object { get; set; }
+    public string[]? Array { get; init; }
+    public MyObject? Object { get; init; }
 }
 ```
 
