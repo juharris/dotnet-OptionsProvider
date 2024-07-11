@@ -182,7 +182,7 @@ public sealed class OptionsProviderBuilder(
 	/// <summary>
 	/// The converted version of a loaded configuration file.
 	/// </summary>
-	private class FileConfig
+	private sealed class FileConfig
 	{
 		public required OptionsMetadata Metadata { get; init; }
 		public required IConfigurationSource Source { get; init; }
@@ -191,9 +191,9 @@ public sealed class OptionsProviderBuilder(
 	/// <summary>
 	/// The schema for a configuration file.
 	/// </summary>
-	private class OptionsFileSchema
+	private sealed class OptionsFileSchema
 	{
-		public required OptionsMetadata Metadata { get; set; }
-		public required JsonElement Options { get; set; }
+		public required OptionsMetadata Metadata { get; init; }
+		public required JsonElement Options { get; init; }
 	}
 }

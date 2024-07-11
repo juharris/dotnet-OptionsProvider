@@ -3,7 +3,7 @@
 /// <summary>
 /// An example configuration for tests.
 /// </summary>
-internal class NonCachedConfiguration
+internal sealed class NonCachedConfiguration
 {
 	public string[]? Array { get; set; }
 	public MyObject? Object { get; set; }

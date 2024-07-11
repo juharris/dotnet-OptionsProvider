@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 namespace OptionsProvider.Tests;
 
 [TestClass]
-public class OptionsProviderTests
+public sealed class OptionsProviderTests
 {
 	private static readonly MyConfiguration DefaultMyConfiguration = new()
 	{
