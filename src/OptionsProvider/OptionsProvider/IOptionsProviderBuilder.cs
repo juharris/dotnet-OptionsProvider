@@ -36,9 +36,9 @@ public interface IOptionsProviderBuilder
 	/// <summary>
 	/// Adds a configuration for a feature.
 	/// </summary>
-	/// <param name="featureName">The name of the feature.</param>
+	/// <param name="metadata">Metadata about the feature. The <see cref="OptionsMetadata.Name"/> must be set.</param>
 	/// <param name="configurationSource">The configuration for the feature.</param>
 	/// <returns>The current builder.</returns>
 	/// <remarks>No extra validation is done to check for conflicts with existing feature names.</remarks>
-	IOptionsProviderBuilder SetConfigurationSource(string featureName, IConfigurationSource configurationSource);
+	IOptionsProviderBuilder SetConfigurationSource(OptionsMetadata metadata, IConfigurationSource configurationSource);
 }

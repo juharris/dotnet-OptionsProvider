@@ -92,9 +92,19 @@ public sealed class OptionsProviderBuilder(
 	}
 
 	/// <inheritdoc/>
-	public IOptionsProviderBuilder SetConfigurationSource(string featureName, IConfigurationSource configurationSource)
+	public IOptionsProviderBuilder SetConfigurationSource(OptionsMetadata metadata, IConfigurationSource configurationSource)
 	{
+		var featureName = metadata.Name;
+		ArgumentNullException.ThrowIfNull(featureName, nameof(metadata.Name));
 		this.SetAlias(featureName, featureName);
+		if (metadata.Aliases is not null)
+		{
+			foreach (var alias in metadata.Aliases)
+			{
+				this.SetAlias(alias, featureName);
+			}
+		}
+
 		this.sourcesMapping[featureName] = configurationSource;
 		return this;
 	}
