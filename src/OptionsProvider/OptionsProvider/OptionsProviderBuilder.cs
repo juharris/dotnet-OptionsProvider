@@ -39,6 +39,40 @@ public sealed class OptionsProviderBuilder(
 	private readonly Dictionary<string, IConfigurationSource> sourcesMapping = new(StringComparer.OrdinalIgnoreCase);
 
 	/// <inheritdoc/>
+	public IOptionsProviderBuilder AddAlias(string alias, string featureName)
+	{
+		if (!this.altNameMapping.TryAdd(alias, featureName))
+		{
+			throw new InvalidOperationException($"The alias \"{alias}\" for \"{featureName}\" is already used as an alias or feature name.");
+		}
+		return this;
+	}
+
+	/// <inheritdoc/>
+	public IOptionsProviderBuilder AddConfigurationSource(OptionsMetadata metadata, IConfigurationSource configurationSource)
+	{
+		var featureName = metadata.Name;
+		ArgumentNullException.ThrowIfNull(featureName, nameof(metadata.Name));
+
+		// Provide a canonical case-insensitive name for the configuration which also simplifies mapping alternative names to the canonical name.
+		this.AddAlias(featureName, featureName);
+		if (metadata.Aliases is not null)
+		{
+			foreach (var alias in metadata.Aliases)
+			{
+				this.AddAlias(alias, featureName);
+			}
+		}
+
+		if (!this.sourcesMapping.TryAdd(featureName, configurationSource))
+		{
+			throw new InvalidOperationException($"The feature name \"{featureName}\" already has a mapped configuration.");
+		}
+
+		return this;
+	}
+
+	/// <inheritdoc/>
 	public async Task<IOptionsProviderBuilder> AddDirectoryAsync(string rootPath)
 	{
 		var paths = Directory.EnumerateFiles(rootPath, "*.json", SearchOption.AllDirectories)
@@ -53,25 +87,13 @@ public sealed class OptionsProviderBuilder(
 			.ToArray());
 		foreach (var (configPath, fileConfig) in paths.Zip(fileConfigs))
 		{
-			var name = fileConfig.Metadata.Name!;
-
-			// Provide a canonical case-insensitive name for the configuration which also simplifies mapping alternative names to the canonical name.
-			if (!this.altNameMapping.TryAdd(name, name))
+			try
 			{
-				throw new InvalidOperationException($"The name \"{name}\" for the configuration file \"{configPath}\" is already used.");
+				this.AddConfigurationSource(fileConfig.Metadata, fileConfig.Source);
 			}
-
-			this.sourcesMapping[name] = fileConfig.Source;
-
-			if (fileConfig.Metadata.Aliases is not null)
+			catch (InvalidOperationException exc)
 			{
-				foreach (var alias in fileConfig.Metadata.Aliases)
-				{
-					if (!this.altNameMapping.TryAdd(alias, name))
-					{
-						throw new InvalidOperationException($"The alias name \"{alias}\" for the configuration file \"{configPath}\" is already used.");
-					}
-				}
+				throw new InvalidOperationException($"Error loading the configuration file at \"{configPath}\".", exc);
 			}
 		}
 
@@ -96,6 +118,8 @@ public sealed class OptionsProviderBuilder(
 	{
 		var featureName = metadata.Name;
 		ArgumentNullException.ThrowIfNull(featureName, nameof(metadata.Name));
+
+		// Provide a canonical case-insensitive name for the configuration which also simplifies mapping alternative names to the canonical name.
 		this.SetAlias(featureName, featureName);
 		if (metadata.Aliases is not null)
 		{

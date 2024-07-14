@@ -1,11 +1,12 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Memory;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace OptionsProvider.Tests;
 
 [TestClass]
-public sealed class OptionsLoaderTests
+public sealed class OptionsProviderBuilderTests
 {
 	// Won't be `null` when running tests.
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
@@ -46,11 +47,39 @@ public sealed class OptionsLoaderTests
 	}
 
 	[TestMethod]
-	public async Task Test_LoadAsync_with_Existing_Name()
+	public async Task Test_AddDirectoryAsync_with_Existing_Name()
 	{
 		var builder = ServiceProvider.GetRequiredService<IOptionsProviderBuilder>();
 		var action = () => builder.AddDirectoryAsync("InvalidConfigurations");
 		await action.Should().ThrowAsync<InvalidOperationException>()
-			.WithMessage($"The name \"other example\" for the configuration file \"{Path.Combine("InvalidConfigurations", "other example.json")}\" is already used.");
+			.WithMessage($"Error loading the configuration file at \"{Path.Combine("InvalidConfigurations", "other example.json")}\".")
+			.WithInnerException<InvalidOperationException, InvalidOperationException>()
+			.WithMessage($"The alias \"other example\" for \"other example\" is already used as an alias or feature name.");
+	}
+
+	[TestMethod]
+	public void Test_SetConfigurationSource_with_Existing_Name()
+	{
+		var metadata = new OptionsMetadata
+		{
+			Name = "name",
+			Aliases = ["alias"],
+			Owners = "owner",
+		};
+		var builder = ServiceProvider.GetRequiredService<IOptionsProviderBuilder>();
+		var configSource = new MemoryConfigurationSource
+		{
+			InitialData = new Dictionary<string, string?>
+			{
+				["key"] = "value",
+			},
+		};
+		var provider = builder.SetConfigurationSource(metadata, configSource)
+			.Build();
+		var value = provider.GetOptions<string?>("key", ["name"]);
+		value.Should().Be("value");
+		var value2 = provider.GetOptions<string?>("key", ["alias"]);
+		value2.Should().BeSameAs(value);
+
 	}
 }
