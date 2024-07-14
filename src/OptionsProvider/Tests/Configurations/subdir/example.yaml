@@ -1,9 +1,10 @@
 metadata:
     aliases:
         - sub_example
-    # This is an example that is also used in tests.
-    isPersistent: true
+    bestBeforeDate: "2029-11-29"
     owners: Justin@site.com
+    otherInfo:
+        custom: "info"
 options:
     config:
         array:

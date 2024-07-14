@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -40,6 +41,8 @@ public sealed class OptionsProviderTests
 			["sub_example"] = "subdir/example",
 			["subdir/example"] = "subdir/example",
 		});
+
+		aliases.Should().ContainKey("DeePeR");
 	}
 
 	[TestMethod]
@@ -48,6 +51,18 @@ public sealed class OptionsProviderTests
 		var featureNames = OptionsProviderBuilderTests.OptionsProvider.GetFeatureNames();
 		featureNames.Should().BeAssignableTo<ImmutableArray<string>>();
 		featureNames.Should().BeEquivalentTo(["deeper_example", "deeper_example2", "example", "subdir/example"]);
+	}
+
+	[TestMethod]
+	public void Test_GetMetadata()
+	{
+		var metadatas = OptionsProviderBuilderTests.OptionsProvider.GetMetadataMapping();
+		metadatas.Should().BeAssignableTo<ImmutableDictionary<string, OptionsMetadata>>();
+		metadatas.Should().ContainKey("deeper_example");
+		metadatas.Should().ContainKey("subdir/example");
+		var metadata = metadatas["subdir/example"];
+		metadata.BestBeforeDate.Should().Be(new DateTime(2029, 11, 29));
+		metadata.OtherInfo.ToString().Should().BeEquivalentTo(@"{""custom"": ""info""}");
 	}
 
 	[TestMethod]

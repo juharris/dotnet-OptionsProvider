@@ -47,21 +47,26 @@ internal sealed record class CacheKey(
 internal sealed class OptionsProviderWithDefaults(
 	IConfiguration baseConfiguration,
 	IMemoryCache cache,
-	IDictionary<string, IConfigurationSource> sources,
-	IDictionary<string, string> aliasMapping)
+	IDictionary<string, string> aliasMapping,
+	IDictionary<string, OptionsMetadata> metadataMapping,
+	IDictionary<string, IConfigurationSource> sources)
 	: IOptionsProvider
 {
 	public IDictionary<string, string> GetAliasMapping()
 	{
-		return aliasMapping.ToImmutableDictionary();
+		return aliasMapping.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
 	}
 
 	public ICollection<string> GetFeatureNames()
 	{
-		// An immutable array is wanted.
 #pragma warning disable IDE0305 // Simplify collection initialization
 		return sources.Keys.ToImmutableArray();
 #pragma warning restore IDE0305 // Simplify collection initialization
+	}
+
+	public IDictionary<string, OptionsMetadata> GetMetadataMapping()
+	{
+		return metadataMapping.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
 	}
 
 	public T? GetOptions<T>(

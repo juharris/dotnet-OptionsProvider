@@ -13,6 +13,9 @@ public interface IOptionsProvider
 	/// <returns>The known feature names, but not aliases.</returns>
 	ICollection<string> GetFeatureNames();
 
+	/// <returns>The metadata for each feature.</returns>
+	IDictionary<string, OptionsMetadata> GetMetadataMapping();
+
 	/// <summary>
 	/// Get the options for the specified key when the specified features are enabled.
 	/// </summary>

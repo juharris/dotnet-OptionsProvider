@@ -32,7 +32,10 @@ internal sealed class OptionsProviderBuilder(
 	/// <summary>
 	/// A mapping from alias to feature name.
 	/// </summary>
-	private readonly Dictionary<string, string> altNameMapping = new(StringComparer.OrdinalIgnoreCase);
+	private readonly Dictionary<string, string> aliasMapping = new(StringComparer.OrdinalIgnoreCase);
+
+	private readonly Dictionary<string, OptionsMetadata> metadataMapping = new(StringComparer.OrdinalIgnoreCase);
+
 	/// <summary>
 	/// A mapping from feature name to the configuration for the feature.
 	/// </summary>
@@ -40,10 +43,13 @@ internal sealed class OptionsProviderBuilder(
 
 	public IOptionsProviderBuilder AddAlias(string alias, string featureName)
 	{
-		if (!this.altNameMapping.TryAdd(alias, featureName))
+		if (!this.aliasMapping.TryAdd(alias, featureName))
 		{
 			throw new InvalidOperationException($"The alias \"{alias}\" for \"{featureName}\" is already used as an alias or feature name.");
 		}
+
+		// TODO Update metadata? It would make `AddConfigurationSource` less efficient.
+
 		return this;
 	}
 
@@ -66,6 +72,8 @@ internal sealed class OptionsProviderBuilder(
 		{
 			throw new InvalidOperationException($"The feature name \"{featureName}\" already has a mapped configuration.");
 		}
+
+		this.metadataMapping[featureName] = metadata;
 
 		return this;
 	}
@@ -99,12 +107,12 @@ internal sealed class OptionsProviderBuilder(
 
 	public IOptionsProvider Build()
 	{
-		return new OptionsProviderWithDefaults(baseConfiguration, cache, this.sourcesMapping, this.altNameMapping);
+		return new OptionsProviderWithDefaults(baseConfiguration, cache, this.aliasMapping, this.metadataMapping, this.sourcesMapping);
 	}
 
 	public IOptionsProviderBuilder SetAlias(string alias, string featureName)
 	{
-		this.altNameMapping[alias] = featureName;
+		this.aliasMapping[alias] = featureName;
 		return this;
 	}
 
@@ -124,6 +132,7 @@ internal sealed class OptionsProviderBuilder(
 		}
 
 		this.sourcesMapping[featureName] = configurationSource;
+		this.metadataMapping[featureName] = metadata;
 		return this;
 	}
 
