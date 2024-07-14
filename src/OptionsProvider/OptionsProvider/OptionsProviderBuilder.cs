@@ -8,7 +8,7 @@ namespace OptionsProvider;
 /// <summary>
 /// Simple options loader.
 /// </summary>
-public sealed class OptionsProviderBuilder(
+internal sealed class OptionsProviderBuilder(
 	IConfiguration baseConfiguration,
 	IMemoryCache cache)
 	: IOptionsProviderBuilder
@@ -38,7 +38,6 @@ public sealed class OptionsProviderBuilder(
 	/// </summary>
 	private readonly Dictionary<string, IConfigurationSource> sourcesMapping = new(StringComparer.OrdinalIgnoreCase);
 
-	/// <inheritdoc/>
 	public IOptionsProviderBuilder AddAlias(string alias, string featureName)
 	{
 		if (!this.altNameMapping.TryAdd(alias, featureName))
@@ -48,7 +47,6 @@ public sealed class OptionsProviderBuilder(
 		return this;
 	}
 
-	/// <inheritdoc/>
 	public IOptionsProviderBuilder AddConfigurationSource(OptionsMetadata metadata, IConfigurationSource configurationSource)
 	{
 		var featureName = metadata.Name;
@@ -72,7 +70,6 @@ public sealed class OptionsProviderBuilder(
 		return this;
 	}
 
-	/// <inheritdoc/>
 	public async Task<IOptionsProviderBuilder> AddDirectoryAsync(string rootPath)
 	{
 		var paths = Directory.EnumerateFiles(rootPath, "*.json", SearchOption.AllDirectories)
@@ -100,20 +97,17 @@ public sealed class OptionsProviderBuilder(
 		return this;
 	}
 
-	/// <inheritdoc/>
 	public IOptionsProvider Build()
 	{
 		return new OptionsProviderWithDefaults(baseConfiguration, cache, this.sourcesMapping, this.altNameMapping);
 	}
 
-	/// <inheritdoc/>
 	public IOptionsProviderBuilder SetAlias(string alias, string featureName)
 	{
 		this.altNameMapping[alias] = featureName;
 		return this;
 	}
 
-	/// <inheritdoc/>
 	public IOptionsProviderBuilder SetConfigurationSource(OptionsMetadata metadata, IConfigurationSource configurationSource)
 	{
 		var featureName = metadata.Name;

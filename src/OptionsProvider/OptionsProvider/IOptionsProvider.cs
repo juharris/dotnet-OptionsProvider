@@ -7,6 +7,12 @@ namespace OptionsProvider;
 /// </summary>
 public interface IOptionsProvider
 {
+	/// <returns>The mapping from alias to feature name.</returns>
+	IDictionary<string, string> GetAliasMapping();
+
+	/// <returns>The known feature names, but not aliases.</returns>
+	ICollection<string> GetFeatureNames();
+
 	/// <summary>
 	/// Get the options for the specified key when the specified features are enabled.
 	/// </summary>

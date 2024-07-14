@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -23,6 +24,31 @@ public sealed class OptionsProviderTests
 		Array = ["sub_example item 1", "sub_example item 2"],
 		Object = new MyObject { One = 11, Two = 22, Three = 3, },
 	};
+
+	[TestMethod]
+	public void Test_GetAliasMapping()
+	{
+		var aliases = OptionsProviderBuilderTests.OptionsProvider.GetAliasMapping();
+		aliases.Should().BeAssignableTo<ImmutableDictionary<string, string>>();
+		aliases.Should().BeEquivalentTo(new Dictionary<string, string>
+		{
+			["deeper"] = "deeper_example",
+			["deeper_example"] = "deeper_example",
+			["deeper_example2"] = "deeper_example2",
+			["deeper2"] = "deeper_example2",
+			["example"] = "example",
+			["sub_example"] = "subdir/example",
+			["subdir/example"] = "subdir/example",
+		});
+	}
+
+	[TestMethod]
+	public void Test_GetFeatureNames()
+	{
+		var featureNames = OptionsProviderBuilderTests.OptionsProvider.GetFeatureNames();
+		featureNames.Should().BeAssignableTo<ImmutableArray<string>>();
+		featureNames.Should().BeEquivalentTo(["deeper_example", "deeper_example2", "example", "subdir/example"]);
+	}
 
 	[TestMethod]
 	public void Test_GetOptions_No_Config()
