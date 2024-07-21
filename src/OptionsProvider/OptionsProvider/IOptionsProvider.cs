@@ -7,13 +7,20 @@ namespace OptionsProvider;
 /// </summary>
 public interface IOptionsProvider
 {
-	/// <returns>The mapping from alias to feature name.</returns>
+	/// <returns>
+	/// The mapping from alias to feature name.
+	/// Keys include the feature names that may be derived from file names.
+	/// </returns>
 	IDictionary<string, string> GetAliasMapping();
 
-	/// <returns>The known feature names, but not aliases.</returns>
+	/// <returns>
+	/// The known feature names, but not aliases.
+	/// </returns>
 	ICollection<string> GetFeatureNames();
 
-	/// <returns>The metadata for each feature.</returns>
+	/// <returns>
+	/// The metadata for each feature.
+	/// </returns>
 	IDictionary<string, OptionsMetadata> GetMetadataMapping();
 
 	/// <summary>
