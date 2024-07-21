@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -25,16 +26,55 @@ public sealed class OptionsProviderTests
 	};
 
 	[TestMethod]
+	public void Test_GetAliasMapping()
+	{
+		var aliases = OptionsProviderBuilderTests.OptionsProvider.GetAliasMapping();
+		aliases.Should().BeAssignableTo<ImmutableDictionary<string, string>>();
+		aliases.Should().BeEquivalentTo(new Dictionary<string, string>
+		{
+			["deeper"] = "deeper_example",
+			["deeper_example"] = "deeper_example",
+			["deeper_example2"] = "deeper_example2",
+			["deeper2"] = "deeper_example2",
+			["example"] = "example",
+			["sub_example"] = "subdir/example",
+			["subdir/example"] = "subdir/example",
+		});
+
+		aliases.Should().ContainKey("DeePeR");
+	}
+
+	[TestMethod]
+	public void Test_GetFeatureNames()
+	{
+		var featureNames = OptionsProviderBuilderTests.OptionsProvider.GetFeatureNames();
+		featureNames.Should().BeAssignableTo<ImmutableArray<string>>();
+		featureNames.Should().BeEquivalentTo(["deeper_example", "deeper_example2", "example", "subdir/example"]);
+	}
+
+	[TestMethod]
+	public void Test_GetMetadata()
+	{
+		var metadatas = OptionsProviderBuilderTests.OptionsProvider.GetMetadataMapping();
+		metadatas.Should().BeAssignableTo<ImmutableDictionary<string, OptionsMetadata>>();
+		metadatas.Should().ContainKey("deeper_example");
+		metadatas.Should().ContainKey("subdir/example");
+		var metadata = metadatas["subdir/example"];
+		metadata.BestBeforeDate.Should().Be(new DateTime(2029, 11, 29));
+		metadata.Details.ToString().Should().BeEquivalentTo(@"{""custom"": ""info""}");
+	}
+
+	[TestMethod]
 	public void Test_GetOptions_No_Config()
 	{
-		var config = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("does not exist");
+		var config = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("does not exist");
 		Assert.IsNull(config);
 	}
 
 	[TestMethod]
 	public void Test_GetOptions_without_Features()
 	{
-		var config = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config");
+		var config = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config");
 		Assert.IsNotNull(config);
 		config.Should().BeEquivalentTo(DefaultMyConfiguration);
 	}
@@ -42,11 +82,11 @@ public sealed class OptionsProviderTests
 	[TestMethod]
 	public void Test_GetOptions_with_Features()
 	{
-		var config = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["example"]);
+		var config = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["example"]);
 		Assert.IsNotNull(config);
 		config.Should().BeEquivalentTo(ExampleMyConfiguration);
 
-		config = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["sub_example"]);
+		config = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["sub_example"]);
 		Assert.IsNotNull(config);
 		config.Should().BeEquivalentTo(SubExampleMyConfiguration);
 	}
@@ -54,18 +94,18 @@ public sealed class OptionsProviderTests
 	[TestMethod]
 	public void Test_GetOptions_For_Deep_Key()
 	{
-		var array = OptionsLoaderTests.OptionsProvider.GetOptions<string[]>("config:array", ["example"]);
+		var array = OptionsProviderBuilderTests.OptionsProvider.GetOptions<string[]>("config:array", ["example"]);
 		Assert.IsNotNull(array);
 		array.Should().Equal(ExampleMyConfiguration.Array);
 
-		var one = OptionsLoaderTests.OptionsProvider.GetOptions<int>("config:object:one", ["sub_example"]);
+		var one = OptionsProviderBuilderTests.OptionsProvider.GetOptions<int>("config:object:one", ["sub_example"]);
 		one.Should().Be(SubExampleMyConfiguration.Object!.One);
 	}
 
 	[TestMethod]
 	public void Test_GetOptions_with_Unknown_Feature()
 	{
-		var action = () => OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["unknown"]);
+		var action = () => OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["unknown"]);
 		action.Should().Throw<InvalidOperationException>()
 			.WithMessage("The given feature name \"unknown\" is not a known feature.");
 	}
@@ -73,23 +113,23 @@ public sealed class OptionsProviderTests
 	[TestMethod]
 	public void Test_GetOptions_Same_Instance_without_Features()
 	{
-		var config1 = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config");
-		var config2 = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config");
+		var config1 = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config");
+		var config2 = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config");
 		Assert.AreSame(config1, config2);
 	}
 
 	[TestMethod]
 	public void Test_GetOptions_Same_Instance()
 	{
-		var config1 = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["example"]);
-		var config2 = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["eXamPlE"]);
+		var config1 = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["example"]);
+		var config2 = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["eXamPlE"]);
 		Assert.AreSame(config1, config2);
 
 		// Test with IOptionsSnapshot.
 		// Putting all tests for "example" in one method to avoid concurrency issues.
 		MyConfiguration scope1Config, scope2Config;
 		{
-			using var scope = OptionsLoaderTests.ServiceProvider.CreateScope();
+			using var scope = OptionsProviderBuilderTests.ServiceProvider.CreateScope();
 			var featuresContext = scope.ServiceProvider.GetRequiredService<IFeaturesContext>();
 			featuresContext.FeatureNames = ["example"];
 			scope1Config = scope.ServiceProvider.GetRequiredService<IOptionsSnapshot<MyConfiguration>>().Value;
@@ -97,7 +137,7 @@ public sealed class OptionsProviderTests
 		}
 
 		{
-			using var scope = OptionsLoaderTests.ServiceProvider.CreateScope();
+			using var scope = OptionsProviderBuilderTests.ServiceProvider.CreateScope();
 			var featuresContext = scope.ServiceProvider.GetRequiredService<IFeaturesContext>();
 			featuresContext.FeatureNames = ["eXamplE"];
 			scope2Config = scope.ServiceProvider.GetRequiredService<IOptionsSnapshot<MyConfiguration>>().Value;
@@ -115,15 +155,15 @@ public sealed class OptionsProviderTests
 	[TestMethod]
 	public void Test_GetOptions_Same_Instance_With_AlternativeName()
 	{
-		var config1 = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["subdir/example"]);
-		var config2 = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["sub_eXaMpLe"]);
+		var config1 = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["subdir/example"]);
+		var config2 = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["sub_eXaMpLe"]);
 		Assert.AreSame(config1, config2);
 	}
 
 	[TestMethod]
 	public void Test_GetOptions_Example_Sub_Example()
 	{
-		var config = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["example", "subdir/example"]);
+		var config = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["example", "subdir/example"]);
 		config.Should().BeEquivalentTo(SubExampleMyConfiguration);
 	}
 
@@ -135,7 +175,7 @@ public sealed class OptionsProviderTests
 			Array = ["example item 1", "sub_example item 2"],
 			Object = new MyObject { One = 11, Two = 22, Three = 3 },
 		};
-		var config = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["sub_example", "example"]);
+		var config = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["sub_example", "example"]);
 		config.Should().BeEquivalentTo(expected);
 	}
 
@@ -145,13 +185,13 @@ public sealed class OptionsProviderTests
 		// Test with IOptionsSnapshot.
 		NonCachedConfiguration scope1Config, scope2Config;
 		{
-			using var scope = OptionsLoaderTests.ServiceProvider.CreateScope();
+			using var scope = OptionsProviderBuilderTests.ServiceProvider.CreateScope();
 			scope1Config = scope.ServiceProvider.GetRequiredService<IOptionsSnapshot<NonCachedConfiguration>>().Value;
 			scope1Config.Should().BeEquivalentTo(DefaultMyConfiguration);
 		}
 
 		{
-			using var scope = OptionsLoaderTests.ServiceProvider.CreateScope();
+			using var scope = OptionsProviderBuilderTests.ServiceProvider.CreateScope();
 			scope2Config = scope.ServiceProvider.GetRequiredService<IOptionsSnapshot<NonCachedConfiguration>>().Value;
 			scope2Config.Should().BeEquivalentTo(DefaultMyConfiguration);
 		}
@@ -218,7 +258,7 @@ public sealed class OptionsProviderTests
 				},
 			],
 		};
-		var config = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["deePer"]);
+		var config = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["deePer"]);
 		config.Should().BeEquivalentTo(expectedDeeper);
 
 		var expectedDeeper2 = new MyConfiguration()
@@ -261,7 +301,7 @@ public sealed class OptionsProviderTests
 				},
 			],
 		};
-		config = OptionsLoaderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["deePer", "DEEPER2"]);
+		config = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["deePer", "DEEPER2"]);
 		config.Should().BeEquivalentTo(expectedDeeper2);
 	}
 }

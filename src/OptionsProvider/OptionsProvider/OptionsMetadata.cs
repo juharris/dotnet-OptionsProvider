@@ -1,4 +1,6 @@
-﻿namespace OptionsProvider;
+﻿using System.Text.Json;
+
+namespace OptionsProvider;
 
 /// <summary>
 /// Extra information about the group of options.
@@ -39,4 +41,9 @@ public sealed class OptionsMetadata
 	/// Indicates if this group of options is expected to be supported for a long time.
 	/// </summary>
 	public bool IsPersistent { get; set; }
+
+	/// <summary>
+	/// Other metadata that may be custom and application specific.
+	/// </summary>
+	public JsonElement? Details { get; init; }
 }

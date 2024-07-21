@@ -8,7 +8,7 @@ namespace OptionsProvider;
 /// <summary>
 /// Simple options loader.
 /// </summary>
-public sealed class OptionsProviderBuilder(
+internal sealed class OptionsProviderBuilder(
 	IConfiguration baseConfiguration,
 	IMemoryCache cache)
 	: IOptionsProviderBuilder
@@ -32,13 +32,52 @@ public sealed class OptionsProviderBuilder(
 	/// <summary>
 	/// A mapping from alias to feature name.
 	/// </summary>
-	private readonly Dictionary<string, string> altNameMapping = new(StringComparer.OrdinalIgnoreCase);
+	private readonly Dictionary<string, string> aliasMapping = new(StringComparer.OrdinalIgnoreCase);
+
+	private readonly Dictionary<string, OptionsMetadata> metadataMapping = new(StringComparer.OrdinalIgnoreCase);
+
 	/// <summary>
 	/// A mapping from feature name to the configuration for the feature.
 	/// </summary>
 	private readonly Dictionary<string, IConfigurationSource> sourcesMapping = new(StringComparer.OrdinalIgnoreCase);
 
-	/// <inheritdoc/>
+	public IOptionsProviderBuilder AddAlias(string alias, string featureName)
+	{
+		if (!this.aliasMapping.TryAdd(alias, featureName))
+		{
+			throw new InvalidOperationException($"The alias \"{alias}\" for \"{featureName}\" is already used as an alias or feature name.");
+		}
+
+		// TODO Update metadata? It would make `AddConfigurationSource` less efficient.
+
+		return this;
+	}
+
+	public IOptionsProviderBuilder AddConfigurationSource(OptionsMetadata metadata, IConfigurationSource configurationSource)
+	{
+		var featureName = metadata.Name;
+		ArgumentNullException.ThrowIfNull(featureName, nameof(metadata.Name));
+
+		// Provide a canonical case-insensitive name for the configuration which also simplifies mapping alternative names to the canonical name.
+		this.AddAlias(featureName, featureName);
+		if (metadata.Aliases is not null)
+		{
+			foreach (var alias in metadata.Aliases)
+			{
+				this.AddAlias(alias, featureName);
+			}
+		}
+
+		if (!this.sourcesMapping.TryAdd(featureName, configurationSource))
+		{
+			throw new InvalidOperationException($"The feature name \"{featureName}\" already has a mapped configuration.");
+		}
+
+		this.metadataMapping[featureName] = metadata;
+
+		return this;
+	}
+
 	public async Task<IOptionsProviderBuilder> AddDirectoryAsync(string rootPath)
 	{
 		var paths = Directory.EnumerateFiles(rootPath, "*.json", SearchOption.AllDirectories)
@@ -53,49 +92,47 @@ public sealed class OptionsProviderBuilder(
 			.ToArray());
 		foreach (var (configPath, fileConfig) in paths.Zip(fileConfigs))
 		{
-			var name = fileConfig.Metadata.Name!;
-
-			// Provide a canonical case-insensitive name for the configuration which also simplifies mapping alternative names to the canonical name.
-			if (!this.altNameMapping.TryAdd(name, name))
+			try
 			{
-				throw new InvalidOperationException($"The name \"{name}\" for the configuration file \"{configPath}\" is already used.");
+				this.AddConfigurationSource(fileConfig.Metadata, fileConfig.Source);
 			}
-
-			this.sourcesMapping[name] = fileConfig.Source;
-
-			if (fileConfig.Metadata.Aliases is not null)
+			catch (InvalidOperationException exc)
 			{
-				foreach (var alias in fileConfig.Metadata.Aliases)
-				{
-					if (!this.altNameMapping.TryAdd(alias, name))
-					{
-						throw new InvalidOperationException($"The alias name \"{alias}\" for the configuration file \"{configPath}\" is already used.");
-					}
-				}
+				throw new InvalidOperationException($"Error loading the configuration file at \"{configPath}\".", exc);
 			}
 		}
 
 		return this;
 	}
 
-	/// <inheritdoc/>
 	public IOptionsProvider Build()
 	{
-		return new OptionsProviderWithDefaults(baseConfiguration, cache, this.sourcesMapping, this.altNameMapping);
+		return new OptionsProviderWithDefaults(baseConfiguration, cache, this.aliasMapping, this.metadataMapping, this.sourcesMapping);
 	}
 
-	/// <inheritdoc/>
 	public IOptionsProviderBuilder SetAlias(string alias, string featureName)
 	{
-		this.altNameMapping[alias] = featureName;
+		this.aliasMapping[alias] = featureName;
 		return this;
 	}
 
-	/// <inheritdoc/>
-	public IOptionsProviderBuilder SetConfigurationSource(string featureName, IConfigurationSource configurationSource)
+	public IOptionsProviderBuilder SetConfigurationSource(OptionsMetadata metadata, IConfigurationSource configurationSource)
 	{
+		var featureName = metadata.Name;
+		ArgumentNullException.ThrowIfNull(featureName, nameof(metadata.Name));
+
+		// Provide a canonical case-insensitive name for the configuration which also simplifies mapping alternative names to the canonical name.
 		this.SetAlias(featureName, featureName);
+		if (metadata.Aliases is not null)
+		{
+			foreach (var alias in metadata.Aliases)
+			{
+				this.SetAlias(alias, featureName);
+			}
+		}
+
 		this.sourcesMapping[featureName] = configurationSource;
+		this.metadataMapping[featureName] = metadata;
 		return this;
 	}
 

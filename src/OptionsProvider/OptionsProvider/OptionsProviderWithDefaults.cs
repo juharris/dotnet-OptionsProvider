@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using System.Collections.Immutable;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 
 namespace OptionsProvider;
@@ -46,9 +47,28 @@ internal sealed record class CacheKey(
 internal sealed class OptionsProviderWithDefaults(
 	IConfiguration baseConfiguration,
 	IMemoryCache cache,
-	IDictionary<string, IConfigurationSource> sources,
-	IDictionary<string, string> altNameMapping) : IOptionsProvider
+	IDictionary<string, string> aliasMapping,
+	IDictionary<string, OptionsMetadata> metadataMapping,
+	IDictionary<string, IConfigurationSource> sources)
+	: IOptionsProvider
 {
+	public IDictionary<string, string> GetAliasMapping()
+	{
+		return aliasMapping.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
+	}
+
+	public ICollection<string> GetFeatureNames()
+	{
+#pragma warning disable IDE0305 // Simplify collection initialization
+		return sources.Keys.ToImmutableArray();
+#pragma warning restore IDE0305 // Simplify collection initialization
+	}
+
+	public IDictionary<string, OptionsMetadata> GetMetadataMapping()
+	{
+		return metadataMapping.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
+	}
+
 	public T? GetOptions<T>(
 		string key,
 		IReadOnlyCollection<string>? featureNames = null,
@@ -61,7 +81,7 @@ internal sealed class OptionsProviderWithDefaults(
 			mappedFeatureNames = new List<string>(featureNames.Count);
 			foreach (var featureName in featureNames)
 			{
-				if (!altNameMapping.TryGetValue(featureName, out var canonicalFeatureName))
+				if (!aliasMapping.TryGetValue(featureName, out var canonicalFeatureName))
 				{
 					throw new InvalidOperationException($"The given feature name \"{featureName}\" is not a known feature.");
 				}
