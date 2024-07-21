@@ -13,7 +13,10 @@ public interface IOptionsProviderBuilder
 	/// <param name="alias">An alternative name for <paramref name="featureName"/>.</param>
 	/// <param name="featureName">The name of an existing feature.</param>
 	/// <returns>The current builder.</returns>
-	/// <remarks>Validation is done to check for conflicts with existing aliases or feature names.</remarks>
+	/// <remarks>
+	/// Validation is done to check for conflicts with existing aliases or feature names.
+	/// This method does not update <see cref="OptionsMetadata.Aliases"/> yet, but it may in the future.
+	/// </remarks>
 	IOptionsProviderBuilder AddAlias(string alias, string featureName);
 
 	/// <summary>
@@ -48,7 +51,10 @@ public interface IOptionsProviderBuilder
 	/// <param name="alias">An alternative name for <paramref name="featureName"/>.</param>
 	/// <param name="featureName">The name of a feature.</param>
 	/// <returns>The current builder.</returns>
-	/// <remarks>No extra validation is done to check for conflicts with existing aliases or feature names.</remarks>
+	/// <remarks>
+	/// No extra validation is done to check for conflicts with existing aliases or feature names.
+	/// This method does not update <see cref="OptionsMetadata.Aliases"/> yet, but it may in the future.
+	/// </remarks>
 	IOptionsProviderBuilder SetAlias(string alias, string featureName);
 
 	/// <summary>
