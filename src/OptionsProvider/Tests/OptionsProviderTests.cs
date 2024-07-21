@@ -61,7 +61,7 @@ public sealed class OptionsProviderTests
 		metadatas.Should().ContainKey("subdir/example");
 		var metadata = metadatas["subdir/example"];
 		metadata.BestBeforeDate.Should().Be(new DateTime(2029, 11, 29));
-		metadata.OtherInfo.ToString().Should().BeEquivalentTo(@"{""custom"": ""info""}");
+		metadata.Details.ToString().Should().BeEquivalentTo(@"{""custom"": ""info""}");
 	}
 
 	[TestMethod]

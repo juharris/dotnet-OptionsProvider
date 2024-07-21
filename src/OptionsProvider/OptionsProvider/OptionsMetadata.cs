@@ -43,7 +43,7 @@ public sealed class OptionsMetadata
 	public bool IsPersistent { get; set; }
 
 	/// <summary>
-	/// Other metadata.
+	/// Other metadata that may be custom and application specific.
 	/// </summary>
-	public JsonElement? OtherInfo { get; init; }
+	public JsonElement? Details { get; init; }
 }

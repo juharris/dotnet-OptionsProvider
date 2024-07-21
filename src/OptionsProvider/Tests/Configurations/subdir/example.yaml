@@ -3,7 +3,7 @@ metadata:
         - sub_example
     bestBeforeDate: "2029-11-29"
     owners: Justin@site.com
-    otherInfo:
+    details:
         custom: "info"
 options:
     config:
