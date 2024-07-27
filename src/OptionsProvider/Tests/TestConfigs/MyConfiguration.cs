@@ -11,11 +11,18 @@ internal sealed class MyConfiguration
 	public MyDeeperObject[]? DeeperObjects { get; set; }
 }
 
+internal enum MyEnum
+{
+	Default,
+	Second,
+}
+
 internal sealed class MyObject
 {
 	public int One { get; init; }
 	public double Two { get; init; }
 	public uint? Three { get; init; }
+	public MyEnum MyEnum { get; init; }
 }
 
 internal sealed class MyDeeperObject
