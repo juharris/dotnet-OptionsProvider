@@ -14,3 +14,4 @@ options:
             one: 11
             two: 22
             three: 3
+            myenum: "Second"

@@ -22,7 +22,7 @@ public sealed class OptionsProviderTests
 	private static readonly MyConfiguration SubExampleMyConfiguration = new()
 	{
 		Array = ["sub_example item 1", "sub_example item 2"],
-		Object = new MyObject { One = 11, Two = 22, Three = 3, },
+		Object = new MyObject { One = 11, Two = 22, Three = 3, MyEnum = MyEnum.Second, },
 	};
 
 	[TestMethod]
@@ -173,7 +173,7 @@ public sealed class OptionsProviderTests
 		var expected = new MyConfiguration()
 		{
 			Array = ["example item 1", "sub_example item 2"],
-			Object = new MyObject { One = 11, Two = 22, Three = 3 },
+			Object = new MyObject { One = 11, Two = 22, Three = 3, MyEnum = MyEnum.Second, },
 		};
 		var config = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["sub_example", "example"]);
 		config.Should().BeEquivalentTo(expected);
