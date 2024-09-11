@@ -48,6 +48,8 @@ Suppose you have an `appsettings.json` like this to configure `MyConfiguration`:
 }
 ```
 
+_Note: Do not put default values directly in the class. Instead, put defaults in appsettings.json._
+
 Now you want to start experimenting with different values deep within `MyConfiguration`.
 
 Create a **new** folder for configurations files, for this example, we'll call it `Configurations` and add some files to it.
