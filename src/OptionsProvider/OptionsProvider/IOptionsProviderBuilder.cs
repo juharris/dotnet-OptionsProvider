@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-
-namespace OptionsProvider;
+﻿namespace OptionsProvider;
 
 /// <summary>
 /// Loads options from files.
@@ -22,11 +20,13 @@ public interface IOptionsProviderBuilder
 	/// <summary>
 	/// Adds a configuration for a feature.
 	/// </summary>
-	/// <param name="metadata">Metadata about the feature. The <see cref="OptionsMetadata.Name"/> must be set.</param>
-	/// <param name="configurationSource">The configuration for the feature.</param>
+	/// <param name="featureConfiguration">
+	/// Metadata about the feature and the configuration for the feature.
+	/// The <see cref="OptionsMetadata.Name"/> must be set in <see cref="FeatureConfiguration.Metadata"/>.
+	/// </param>
 	/// <returns>The current builder.</returns>
 	/// <remarks>Validation is done to check for conflicts with existing feature names.</remarks>
-	IOptionsProviderBuilder AddConfigurationSource(OptionsMetadata metadata, IConfigurationSource configurationSource);
+	IOptionsProviderBuilder AddConfigurationSource(FeatureConfiguration featureConfiguration);
 
 	/// <summary>
 	/// Loads and options from files in parallel.
@@ -60,9 +60,11 @@ public interface IOptionsProviderBuilder
 	/// <summary>
 	/// Sets a configuration for a feature.
 	/// </summary>
-	/// <param name="metadata">Metadata about the feature. The <see cref="OptionsMetadata.Name"/> must be set.</param>
-	/// <param name="configurationSource">The configuration for the feature.</param>
+	/// <param name="featureConfiguration">
+	/// Metadata about the feature and the configuration for the feature.
+	/// The <see cref="OptionsMetadata.Name"/> must be set in <see cref="FeatureConfiguration.Metadata"/>.
+	/// </param>
 	/// <returns>The current builder.</returns>
 	/// <remarks>No extra validation is done to check for conflicts with existing feature names.</remarks>
-	IOptionsProviderBuilder SetConfigurationSource(OptionsMetadata metadata, IConfigurationSource configurationSource);
+	IOptionsProviderBuilder SetConfigurationSource(FeatureConfiguration featureConfiguration);
 }

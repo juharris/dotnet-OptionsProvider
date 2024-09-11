@@ -10,14 +10,16 @@ namespace OptionsProvider;
 public static class ServiceCollectionExtensions
 {
 	/// <summary>
-	/// Sets up the <see cref="IOptionsProvider"/> for dependency injection.
+	/// Sets up <see cref="IOptionsProvider"/> to be ready for injecting as a dependency.
 	/// </summary>
 	/// <param name="services">The current service collection for dependency injection.</param>
-	/// <param name="path">The base directory to start searching for files.</param>
-	/// <returns><paramref name="services"/></returns>
+	/// <param name="path">The base directory to start searching for files that represent features.</param>
+	/// <param name="featureConfigurations">(optional) Additional custom configurations for features.</param>
+	/// <returns>The <see cref="IServiceCollection"/> for chaining calls.</returns>
 	public static IServiceCollection AddOptionsProvider(
 		this IServiceCollection services,
-		string path)
+		string path,
+		IEnumerable<FeatureConfiguration>? featureConfigurations = null)
 	{
 		services.AddMemoryCache();
 		services.AddTransient<IOptionsProviderBuilder, OptionsProviderBuilder>();
@@ -25,6 +27,13 @@ public static class ServiceCollectionExtensions
 		{
 			var builder = serviceProvider.GetRequiredService<IOptionsProviderBuilder>();
 			builder.AddDirectoryAsync(path).Wait();
+			if (featureConfigurations is not null)
+			{
+				foreach (var featureConfiguration in featureConfigurations)
+				{
+					builder.AddConfigurationSource(featureConfiguration);
+				}
+			}
 			return builder.Build();
 		});
 
@@ -42,7 +51,7 @@ public static class ServiceCollectionExtensions
 	/// <param name="cacheOptionsBuilder">(optional) Creates options to pass to the configuration cache so that configurations do not need to be rebuilt.</param>
 	/// <returns><paramref name="services"/></returns>
 	/// <remarks>
-	/// Requires <see cref="AddOptionsProvider(IServiceCollection, string)"/> to be used.
+	/// Requires <see cref="AddOptionsProvider"/> to be used.
 	/// </remarks>
 	public static IServiceCollection ConfigureOptions<TOptions>(
 		this IServiceCollection services,
@@ -69,6 +78,8 @@ public static class ServiceCollectionExtensions
 			foreach (var property in typeof(TOptions).GetProperties())
 			{
 				var value = property.GetValue(optionsForFeatures);
+
+				// TODO Should we care if `value` is null? Maybe it should still be set.
 				if (value is not null)
 				{
 					property.SetValue(options, value);
