@@ -48,7 +48,10 @@ Suppose you have an `appsettings.json` like this to configure `MyConfiguration`:
 }
 ```
 
-_Note: Do not put default values directly in the class. Instead, put defaults in appsettings.json._
+_Note: Do not put default values directly in the class because they cannot be overriden to `null`.
+Instead, put defaults in appsettings.json for clarity because it's easier to see them in configuration files instead of classes.
+Default values in appsettings.json cannot be overridden to `null` either.
+If a value needs to be set to `null` for a feature, then do not set a default in appsettings.json either._
 
 Now you want to start experimenting with different values deep within `MyConfiguration`.
 
