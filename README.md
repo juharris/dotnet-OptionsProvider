@@ -212,7 +212,12 @@ The builder views the lists as:
 `array` from `Configurations/feature_B.yaml`:\
 `array:0` = `3`
 
-so the merged result is:\
+| key | `feature_A` | `feature_B` | Resulting `array` |
+|-|-|-|-|
+| `array:0` | `1` | `3` | `3` |
+| `array:1` | `2` | | `2` |
+
+So the merged result is:\
 `array:0` = `3`\
 `array:1` = `2`
 
