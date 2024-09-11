@@ -78,12 +78,7 @@ public static class ServiceCollectionExtensions
 			foreach (var property in typeof(TOptions).GetProperties())
 			{
 				var value = property.GetValue(optionsForFeatures);
-
-				// TODO Should we care if `value` is null? Maybe it should still be set.
-				if (value is not null)
-				{
-					property.SetValue(options, value);
-				}
+				property.SetValue(options, value);
 			}
 		});
 		return services;
