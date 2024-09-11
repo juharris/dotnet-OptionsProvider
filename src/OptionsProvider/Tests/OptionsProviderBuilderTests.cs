@@ -74,12 +74,18 @@ public sealed class OptionsProviderBuilderTests
 				["key"] = "value",
 			},
 		};
-		var provider = builder.SetConfigurationSource(metadata, configSource)
+
+		var featureConfig = new FeatureConfiguration
+		{
+			Metadata = metadata,
+			Source = configSource,
+		};
+		var provider = builder
+			.SetConfigurationSource(featureConfig)
 			.Build();
 		var value = provider.GetOptions<string?>("key", ["name"]);
 		value.Should().Be("value");
 		var value2 = provider.GetOptions<string?>("key", ["alias"]);
 		value2.Should().BeSameAs(value);
-
 	}
 }

@@ -1,13 +1,16 @@
 # OptionsProvider
-Enables loading configurations from files to manage options for experiments or flights.
+Enables loading configurations from JSON files, YAML files, or your own [`IConfigurationSource`s][custom-configuration-provider] to manage options for experiments.
 
 Features:
-* **Each *feature flag* is represented by a JSON or YAML file** which contains options to override default configuration values when processing feature names, flight names, or experiment names in a request.
+* **Each *feature flag* can be represented by a JSON or YAML file** which contains options to override default configuration values when processing feature names or experiment names in a request.
 Note that YAML support is still experimental and parsing may change.
 * **Reads separate files in parallel** to keep independent configurations clear and easily maintainable.
 * Supports clear file names and **aliases** for feature names.
 * Uses the same logic that `ConfigurationBuilder` uses to load files so that it's easy to understand as it's the same as how `appsettings*.json` files are loaded.
 * **Caching**: Built configuration objects are cached by default in `IMemoryCache` to avoiding rebuilding the same objects for the same feature names.
+
+This project mainly focuses on supporting features backed by configurations in files with your source code because that's the most clear way for developers to see what values are supported for different configurable options.
+Tools like [Azure App Configuration][azure-app-configuration] to control options externally while the service is running can be used with this library as this library accepts custom `IConfigurationSource`s and overrides the current default `IConfiguration` when given feature names.
 
 # Installation
 ```
@@ -232,3 +235,6 @@ cd src/OptionsProvider
 dotnet pack --configuration Release
 dotnet nuget push OptionsProvider/bin/Release/OptionsProvider.*.nupkg  --source https://api.nuget.org/v3/index.json -k $api_key --skip-duplicate
 ```
+
+[azure-app-configuration]: https://learn.microsoft.com/en-us/azure/azure-app-configuration/
+[custom-configuration-provider]: https://learn.microsoft.com/en-us/dotnet/core/extensions/custom-configuration-provider

@@ -53,8 +53,9 @@ internal sealed class OptionsProviderBuilder(
 		return this;
 	}
 
-	public IOptionsProviderBuilder AddConfigurationSource(OptionsMetadata metadata, IConfigurationSource configurationSource)
+	public IOptionsProviderBuilder AddConfigurationSource(FeatureConfiguration featureConfiguration)
 	{
+		var metadata = featureConfiguration.Metadata;
 		var featureName = metadata.Name;
 		ArgumentNullException.ThrowIfNull(featureName, nameof(metadata.Name));
 
@@ -68,6 +69,7 @@ internal sealed class OptionsProviderBuilder(
 			}
 		}
 
+		var configurationSource = featureConfiguration.Source;
 		if (!this.sourcesMapping.TryAdd(featureName, configurationSource))
 		{
 			throw new InvalidOperationException($"The feature name \"{featureName}\" already has a mapped configuration.");
@@ -94,7 +96,7 @@ internal sealed class OptionsProviderBuilder(
 		{
 			try
 			{
-				this.AddConfigurationSource(fileConfig.Metadata, fileConfig.Source);
+				this.AddConfigurationSource(fileConfig);
 			}
 			catch (InvalidOperationException exc)
 			{
@@ -116,8 +118,9 @@ internal sealed class OptionsProviderBuilder(
 		return this;
 	}
 
-	public IOptionsProviderBuilder SetConfigurationSource(OptionsMetadata metadata, IConfigurationSource configurationSource)
+	public IOptionsProviderBuilder SetConfigurationSource(FeatureConfiguration featureConfiguration)
 	{
+		var metadata = featureConfiguration.Metadata;
 		var featureName = metadata.Name;
 		ArgumentNullException.ThrowIfNull(featureName, nameof(metadata.Name));
 
@@ -131,12 +134,13 @@ internal sealed class OptionsProviderBuilder(
 			}
 		}
 
+		var configurationSource = featureConfiguration.Source;
 		this.sourcesMapping[featureName] = configurationSource;
 		this.metadataMapping[featureName] = metadata;
 		return this;
 	}
 
-	private static async Task<FileConfig> LoadFileAsync(string rootPath, string path)
+	private static async Task<FeatureConfiguration> LoadFileAsync(string rootPath, string path)
 	{
 		try
 		{
@@ -161,7 +165,7 @@ internal sealed class OptionsProviderBuilder(
 			parsedContents.Metadata.Name = Path
 					.ChangeExtension(Path.GetRelativePath(rootPath, path), null)
 					.Replace(Path.DirectorySeparatorChar, '/');
-			return new FileConfig
+			return new()
 			{
 				Metadata = parsedContents.Metadata,
 
@@ -214,15 +218,6 @@ internal sealed class OptionsProviderBuilder(
 				mapping[keyPrefix[..^1]] = element.GetRawText();
 				break;
 		}
-	}
-
-	/// <summary>
-	/// The converted version of a loaded configuration file.
-	/// </summary>
-	private sealed class FileConfig
-	{
-		public required OptionsMetadata Metadata { get; init; }
-		public required IConfigurationSource Source { get; init; }
 	}
 
 	/// <summary>
