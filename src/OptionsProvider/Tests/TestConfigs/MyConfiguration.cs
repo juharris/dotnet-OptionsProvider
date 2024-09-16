@@ -9,6 +9,7 @@ internal sealed class MyConfiguration
 	public MyObject? Object { get; set; }
 	public MyDeeperObject? DeeperObject { get; set; }
 	public MyDeeperObject[]? DeeperObjects { get; set; }
+	public int? OptionalNumber { get; set; }
 }
 
 internal enum MyEnum

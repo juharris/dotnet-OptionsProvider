@@ -15,3 +15,4 @@ options:
             two: 22
             three: 3
             myenum: "Second"
+        optionalNumber: null
