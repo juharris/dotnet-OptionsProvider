@@ -17,6 +17,7 @@ public sealed class OptionsProviderTests
 	{
 		Array = ["example item 1"],
 		Object = new MyObject { One = 1, Two = 2.0 },
+		OptionalNumber = 123,
 	};
 
 	private static readonly MyConfiguration SubExampleMyConfiguration = new()
@@ -148,7 +149,16 @@ public sealed class OptionsProviderTests
 		Assert.AreNotSame(scope1Config, scope2Config);
 		foreach (var prop in scope1Config.GetType().GetProperties())
 		{
-			Assert.AreSame(prop.GetValue(scope1Config), prop.GetValue(scope2Config));
+			if (prop.PropertyType.IsPrimitive
+				|| (Nullable.GetUnderlyingType(prop.PropertyType) is not null
+					&& Nullable.GetUnderlyingType(prop.PropertyType)!.IsPrimitive))
+			{
+				Assert.AreEqual(prop.GetValue(scope1Config), prop.GetValue(scope2Config));
+			}
+			else
+			{
+				Assert.AreSame(prop.GetValue(scope1Config), prop.GetValue(scope2Config));
+			}
 		}
 	}
 
@@ -174,6 +184,7 @@ public sealed class OptionsProviderTests
 		{
 			Array = ["example item 1", "sub_example item 2"],
 			Object = new MyObject { One = 11, Two = 22, Three = 3, MyEnum = MyEnum.Second, },
+			OptionalNumber = 123,
 		};
 		var config = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["sub_example", "example"]);
 		config.Should().BeEquivalentTo(expected);

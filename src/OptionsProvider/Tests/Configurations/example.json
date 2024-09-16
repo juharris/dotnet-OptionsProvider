@@ -8,7 +8,8 @@
 		"config": {
 			"array": [
 				"example item 1"
-			]
+			],
+			"optionalNumber": 123
 		}
 	}
 }
