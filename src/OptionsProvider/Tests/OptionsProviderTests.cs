@@ -49,9 +49,10 @@ public sealed class OptionsProviderTests
 	[TestMethod]
 	public void Test_GetAllOptionsForAllFeatures()
 	{
-		var allconfigs = OptionsProviderBuilderTests.OptionsProvider.GetAllOptionsForAllFeatures<EntireConfig>();
-		allconfigs.Should().HaveCount(4);
-		allconfigs.Single(c => c.Metadata.Name == "example").Configuration!.Config.Should().BeEquivalentTo(ExampleMyConfiguration);
+		var allOptions = OptionsProviderBuilderTests.OptionsProvider.GetAllOptionsForAllFeatures<EntireConfig>();
+		allOptions.Should().HaveCount(4);
+		allOptions.Select(f => f.Metadata.Name).Should().BeEquivalentTo(OptionsProviderBuilderTests.OptionsProvider.GetFeatureNames());
+		allOptions.Single(f => f.Metadata.Name == "example").Configuration!.Config.Should().BeEquivalentTo(ExampleMyConfiguration);
 	}
 
 	[TestMethod]
