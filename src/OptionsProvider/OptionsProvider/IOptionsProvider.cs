@@ -3,7 +3,7 @@
 namespace OptionsProvider;
 
 /// <summary>
-/// Provides options given enabled feature names.
+/// Provides options that are configurable by feature names.
 /// </summary>
 public interface IOptionsProvider
 {
