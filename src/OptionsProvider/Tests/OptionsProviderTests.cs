@@ -49,7 +49,7 @@ public sealed class OptionsProviderTests
 	[TestMethod]
 	public void Test_GetAllConfigurations()
 	{
-		var allconfigs = OptionsProviderBuilderTests.OptionsProvider.GetAllConfigurations<EntireConfig>();
+		var allconfigs = OptionsProviderBuilderTests.OptionsProvider.GetAllOptionsForAllFeatures<EntireConfig>();
 		allconfigs.Should().HaveCount(4);
 		allconfigs.Single(c => c.Metadata.Name == "example").Configuration!.Config.Should().BeEquivalentTo(ExampleMyConfiguration);
 	}
