@@ -47,7 +47,7 @@ public sealed class OptionsProviderTests
 
 
 	[TestMethod]
-	public void Test_GetAllConfigurations()
+	public void Test_GetAllOptionsForAllFeatures()
 	{
 		var allconfigs = OptionsProviderBuilderTests.OptionsProvider.GetAllOptionsForAllFeatures<EntireConfig>();
 		allconfigs.Should().HaveCount(4);
