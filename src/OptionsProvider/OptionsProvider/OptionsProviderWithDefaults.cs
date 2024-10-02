@@ -67,6 +67,18 @@ internal sealed class OptionsProviderWithDefaults(
 		return metadataMapping.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
 	}
 
+	public ICollection<FeatureConfigurationView<T>> GetAllConfigurations<T>()
+	{
+		return metadataMapping
+			.Values
+			.Select(metadata=> new FeatureConfigurationView<T>
+			{
+				Metadata = metadata,
+				Configuration = this.GetAllOptions<T>([metadata.Name]),
+			})
+			.ToArray();
+	}
+
 	public T? GetOptions<T>(
 		string key,
 		IReadOnlyCollection<string>? featureNames = null,

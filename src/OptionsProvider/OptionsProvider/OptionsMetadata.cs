@@ -12,8 +12,10 @@ public sealed class OptionsMetadata
 	/// </summary>
 	/// <remarks>
 	/// This may be derived from the file name including subfolders.
+	/// Should never be <tt>null</tt> or an empty string.
+	/// When loading the options from a file, the name will be set right away.
 	/// </remarks>
-	public string? Name { get; set; }
+	public string Name { get; set; } = string.Empty;
 
 	/// <summary>
 	/// Alternative names for the group of options.

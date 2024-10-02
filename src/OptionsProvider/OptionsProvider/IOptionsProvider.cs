@@ -24,7 +24,14 @@ public interface IOptionsProvider
 	IDictionary<string, OptionsMetadata> GetMetadataMapping();
 
 	/// <summary>
-	/// Gets all the options when the specified features are enabled.
+	/// Gets the configurations for all features.
+	/// </summary>
+	/// <typeparam name="T">The type that holds all options. The type of the root of all options.</typeparam>
+	/// <returns>Each feature along with its configuration.</returns>
+	ICollection<FeatureConfigurationView<T>> GetAllConfigurations<T>();
+
+	/// <summary>
+	/// Gets all the options for all keys when the specified features are enabled.
 	/// </summary>
 	/// <typeparam name="T">The type that holds all options. The type of the root of all options.</typeparam>
 	/// <param name="featureNames">
@@ -41,7 +48,7 @@ public interface IOptionsProvider
 		MemoryCacheEntryOptions? cacheOptions = null);
 
 	/// <summary>
-	/// Get the options for the specified key when the specified features are enabled.
+	/// Get the options for a specific key when the specified features are enabled.
 	/// </summary>
 	/// <typeparam name="T">The type of the options at the key in the configurations.</typeparam>
 	/// <param name="key">
@@ -55,7 +62,7 @@ public interface IOptionsProvider
 	/// (optional) Options for caching the result given the <paramref name="key"/> and <paramref name="featureNames"/>.
 	/// Defaults to not setting any options for the cache entry.
 	/// </param>
-	/// <returns>The configuration.</returns>
+	/// <returns>The configuration for the <paramref name="key"/>.</returns>
 	T? GetOptions<T>(
 		string key,
 		IReadOnlyCollection<string>? featureNames = null,

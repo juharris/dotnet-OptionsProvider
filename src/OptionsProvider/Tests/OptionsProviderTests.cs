@@ -45,6 +45,15 @@ public sealed class OptionsProviderTests
 		aliases.Should().ContainKey("DeePeR");
 	}
 
+
+	[TestMethod]
+	public void Test_GetAllConfigurations()
+	{
+		var allconfigs = OptionsProviderBuilderTests.OptionsProvider.GetAllConfigurations<EntireConfig>();
+		allconfigs.Should().HaveCount(4);
+		allconfigs.Single(c => c.Metadata.Name == "example").Configuration!.Config.Should().BeEquivalentTo(ExampleMyConfiguration);
+	}
+
 	[TestMethod]
 	public void Test_GetAllOptions()
 	{
