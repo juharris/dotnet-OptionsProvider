@@ -52,6 +52,9 @@ public sealed class OptionsProviderTests
 		Assert.IsNotNull(allOptions);
 		allOptions.Config.Should().BeEquivalentTo(DefaultMyConfiguration);
 		allOptions.NonCachedConfig.Should().BeEquivalentTo(DefaultMyConfiguration);
+
+		var allOptions2 = OptionsProviderBuilderTests.OptionsProvider.GetAllOptions<EntireConfig>();
+		Assert.AreSame(allOptions, allOptions2);
 	}
 
 	[TestMethod]
@@ -61,6 +64,9 @@ public sealed class OptionsProviderTests
 		Assert.IsNotNull(allOptions);
 		allOptions.Config.Should().BeEquivalentTo(ExampleMyConfiguration);
 		allOptions.NonCachedConfig.Should().BeEquivalentTo(DefaultMyConfiguration);
+
+		var allOptions2 = OptionsProviderBuilderTests.OptionsProvider.GetAllOptions<EntireConfig>(["example"]);
+		Assert.AreSame(allOptions, allOptions2);
 
 		allOptions = OptionsProviderBuilderTests.OptionsProvider.GetAllOptions<EntireConfig>(["sub_example"]);
 		Assert.IsNotNull(allOptions);
