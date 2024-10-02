@@ -16,12 +16,29 @@ public interface IOptionsProvider
 	/// <returns>
 	/// The known feature names, but not aliases.
 	/// </returns>
-	ICollection<string> GetFeatureNames();
+	IReadOnlyCollection<string> GetFeatureNames();
 
 	/// <returns>
 	/// The metadata for each feature.
 	/// </returns>
 	IDictionary<string, OptionsMetadata> GetMetadataMapping();
+
+	/// <summary>
+	/// Gets all the options when the specified features are enabled.
+	/// </summary>
+	/// <typeparam name="T">The type that holds all options. The type of the root of all options.</typeparam>
+	/// <param name="featureNames">
+	/// (optional) The abstract names of the scenarios to enable.
+	/// Defaults to not using any features, which will yield the default configuration.
+	/// </param>
+	/// <param name="cacheOptions">
+	/// (optional) Options for caching the result given the <paramref name="featureNames"/>.
+	/// Defaults to not setting any options for the cache entry.
+	/// </param>
+	/// <returns>The configuration.</returns>
+	T? GetAllOptions<T>(
+		IReadOnlyCollection<string>? featureNames = null,
+		MemoryCacheEntryOptions? cacheOptions = null);
 
 	/// <summary>
 	/// Get the options for the specified key when the specified features are enabled.

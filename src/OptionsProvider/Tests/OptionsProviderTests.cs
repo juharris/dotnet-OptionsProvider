@@ -46,10 +46,33 @@ public sealed class OptionsProviderTests
 	}
 
 	[TestMethod]
+	public void Test_GetAllOptions()
+	{
+		var allOptions = OptionsProviderBuilderTests.OptionsProvider.GetAllOptions<EntireConfig>();
+		Assert.IsNotNull(allOptions);
+		allOptions.Config.Should().BeEquivalentTo(DefaultMyConfiguration);
+		allOptions.NonCachedConfig.Should().BeEquivalentTo(DefaultMyConfiguration);
+	}
+
+	[TestMethod]
+	public void Test_GetAllOptions_WithFeatures()
+	{
+		var allOptions = OptionsProviderBuilderTests.OptionsProvider.GetAllOptions<EntireConfig>(["example"]);
+		Assert.IsNotNull(allOptions);
+		allOptions.Config.Should().BeEquivalentTo(ExampleMyConfiguration);
+		allOptions.NonCachedConfig.Should().BeEquivalentTo(DefaultMyConfiguration);
+
+		allOptions = OptionsProviderBuilderTests.OptionsProvider.GetAllOptions<EntireConfig>(["sub_example"]);
+		Assert.IsNotNull(allOptions);
+		allOptions.Config.Should().BeEquivalentTo(SubExampleMyConfiguration);
+		allOptions.NonCachedConfig.Should().BeEquivalentTo(DefaultMyConfiguration);
+	}
+
+	[TestMethod]
 	public void Test_GetFeatureNames()
 	{
 		var featureNames = OptionsProviderBuilderTests.OptionsProvider.GetFeatureNames();
-		featureNames.Should().BeAssignableTo<ImmutableArray<string>>();
+		featureNames.Should().BeAssignableTo<IReadOnlyCollection<string>>();
 		featureNames.Should().BeEquivalentTo(["deeper_example", "deeper_example2", "example", "subdir/example"]);
 	}
 

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 namespace OptionsProvider;
 
 internal sealed record class CacheKey(
-	string OptionsKey,
+	string? OptionsKey,
 	List<string>? FeatureNames)
 {
 	public bool Equals(CacheKey? other)
@@ -57,11 +57,9 @@ internal sealed class OptionsProviderWithDefaults(
 		return aliasMapping.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
 	}
 
-	public ICollection<string> GetFeatureNames()
+	public IReadOnlyCollection<string> GetFeatureNames()
 	{
-#pragma warning disable IDE0305 // Simplify collection initialization
-		return sources.Keys.ToImmutableArray();
-#pragma warning restore IDE0305 // Simplify collection initialization
+		return [.. sources.Keys];
 	}
 
 	public IDictionary<string, OptionsMetadata> GetMetadataMapping()
@@ -74,23 +72,10 @@ internal sealed class OptionsProviderWithDefaults(
 		IReadOnlyCollection<string>? featureNames = null,
 		MemoryCacheEntryOptions? cacheOptions = null)
 	{
-		// Valid the feature names and map their canonical names.
-		List<string>? mappedFeatureNames = null;
-		if (featureNames is not null)
-		{
-			mappedFeatureNames = new List<string>(featureNames.Count);
-			foreach (var featureName in featureNames)
-			{
-				if (!aliasMapping.TryGetValue(featureName, out var canonicalFeatureName))
-				{
-					throw new InvalidOperationException($"The given feature name \"{featureName}\" is not a known feature.");
-				}
-				mappedFeatureNames.Add(canonicalFeatureName);
-			}
-		}
+		var mappedFeatureNames = GetMappedFeatures(aliasMapping, featureNames);
 
 		var cacheKey = new CacheKey(key, mappedFeatureNames);
-		return (T?)cache.GetOrCreate(cacheKey, entry =>
+		return cache.GetOrCreate(cacheKey, entry =>
 		{
 			if (cacheOptions is not null)
 			{
@@ -99,6 +84,69 @@ internal sealed class OptionsProviderWithDefaults(
 
 			return this.GetOptionsInternal<T>(key, mappedFeatureNames);
 		});
+	}
+
+	public T? GetAllOptions<T>(
+		IReadOnlyCollection<string>? featureNames = null,
+		MemoryCacheEntryOptions? cacheOptions = null)
+	{
+		var mappedFeatureNames = GetMappedFeatures(aliasMapping, featureNames);
+
+		var cacheKey = new CacheKey(null, mappedFeatureNames);
+		return cache.GetOrCreate(cacheKey, entry =>
+		{
+			if (cacheOptions is not null)
+			{
+				entry.SetOptions(cacheOptions);
+			}
+
+			return this.GetAllOptionsInternal<T>(mappedFeatureNames);
+		});
+		throw new NotImplementedException();
+	}
+
+	private static List<string>? GetMappedFeatures(IDictionary<string, string> aliasMapping, IReadOnlyCollection<string>? featureNames)
+	{
+		// Validate the feature names and map their canonical names.
+		List<string>? result = null;
+		if (featureNames is not null)
+		{
+			result = new List<string>(featureNames.Count);
+			foreach (var featureName in featureNames)
+			{
+				if (!aliasMapping.TryGetValue(featureName, out var canonicalFeatureName))
+				{
+					throw new InvalidOperationException($"The given feature name \"{featureName}\" is not a known feature.");
+				}
+				result.Add(canonicalFeatureName);
+			}
+		}
+
+		return result;
+	}
+
+	private T? GetAllOptionsInternal<T>(IReadOnlyCollection<string>? featureNames = null)
+	{
+		if (featureNames is null || featureNames.Count == 0)
+		{
+			return baseConfiguration.Get<T>();
+		}
+
+		var configurationBuilder = new ConfigurationBuilder()
+			// Fallback to the base default configuration.
+			.AddConfiguration(baseConfiguration);
+
+		// Apply the features in order so that the last ones takes precedence, just like how when multiple appsettings.json files are used.
+		foreach (var featureName in featureNames)
+		{
+			var source = sources[featureName];
+			configurationBuilder.Add(source);
+		}
+
+		var configuration = configurationBuilder.Build();
+		var result = configuration.Get<T>();
+
+		return result;
 	}
 
 	private T? GetOptionsInternal<T>(string key, IReadOnlyCollection<string>? featureNames = null)
