@@ -102,7 +102,6 @@ internal sealed class OptionsProviderWithDefaults(
 
 			return this.GetAllOptionsInternal<T>(mappedFeatureNames);
 		});
-		throw new NotImplementedException();
 	}
 
 	private static List<string>? GetMappedFeatures(IDictionary<string, string> aliasMapping, IReadOnlyCollection<string>? featureNames)
@@ -125,51 +124,37 @@ internal sealed class OptionsProviderWithDefaults(
 		return result;
 	}
 
+	private IConfiguration GetConfig(IReadOnlyCollection<string>? featureNames)
+	{
+		IConfiguration config = baseConfiguration;
+		if (featureNames is not null && featureNames.Count > 0)
+		{
+			var configurationBuilder = new ConfigurationBuilder()
+				// Fallback to the base default configuration.
+				.AddConfiguration(baseConfiguration);
+
+			// Apply the features in order so that the last ones takes precedence, just like how when multiple appsettings.json files are used.
+			foreach (var featureName in featureNames)
+			{
+				var source = sources[featureName];
+				configurationBuilder.Add(source);
+			}
+
+			config = configurationBuilder.Build();
+		}
+
+		return config;
+	}
+
 	private T? GetAllOptionsInternal<T>(IReadOnlyCollection<string>? featureNames = null)
 	{
-		if (featureNames is null || featureNames.Count == 0)
-		{
-			return baseConfiguration.Get<T>();
-		}
-
-		var configurationBuilder = new ConfigurationBuilder()
-			// Fallback to the base default configuration.
-			.AddConfiguration(baseConfiguration);
-
-		// Apply the features in order so that the last ones takes precedence, just like how when multiple appsettings.json files are used.
-		foreach (var featureName in featureNames)
-		{
-			var source = sources[featureName];
-			configurationBuilder.Add(source);
-		}
-
-		var configuration = configurationBuilder.Build();
-		var result = configuration.Get<T>();
-
-		return result;
+		var config = this.GetConfig(featureNames);
+		return config.Get<T>();
 	}
 
 	private T? GetOptionsInternal<T>(string key, IReadOnlyCollection<string>? featureNames = null)
 	{
-		if (featureNames is null || featureNames.Count == 0)
-		{
-			return baseConfiguration.GetSection(key).Get<T>();
-		}
-
-		var configurationBuilder = new ConfigurationBuilder()
-			// Fallback to the base default configuration.
-			.AddConfiguration(baseConfiguration);
-
-		// Apply the features in order so that the last ones takes precedence, just like how when multiple appsettings.json files are used.
-		foreach (var featureName in featureNames)
-		{
-			var source = sources[featureName];
-			configurationBuilder.Add(source);
-		}
-
-		var configuration = configurationBuilder.Build();
-		var result = configuration.GetSection(key).Get<T>();
-
-		return result;
+		var config = this.GetConfig(featureNames);
+		return config.GetSection(key).Get<T>();
 	}
 }
