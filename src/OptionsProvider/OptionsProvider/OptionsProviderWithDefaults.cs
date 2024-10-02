@@ -71,7 +71,7 @@ internal sealed class OptionsProviderWithDefaults(
 	{
 		return metadataMapping
 			.Values
-			.Select(metadata=> new FeatureConfigurationView<T>
+			.Select(metadata => new FeatureConfigurationView<T>
 			{
 				Metadata = metadata,
 				Configuration = this.GetAllOptions<T>([metadata.Name]),
