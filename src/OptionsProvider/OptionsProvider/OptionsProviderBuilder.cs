@@ -57,7 +57,6 @@ internal sealed class OptionsProviderBuilder(
 	{
 		var metadata = featureConfiguration.Metadata;
 		var featureName = metadata.Name;
-		ArgumentNullException.ThrowIfNull(featureName, nameof(metadata.Name));
 
 		// Provide a canonical case-insensitive name for the configuration which also simplifies mapping alternative names to the canonical name.
 		this.AddAlias(featureName, featureName);
@@ -122,7 +121,6 @@ internal sealed class OptionsProviderBuilder(
 	{
 		var metadata = featureConfiguration.Metadata;
 		var featureName = metadata.Name;
-		ArgumentNullException.ThrowIfNull(featureName, nameof(metadata.Name));
 
 		// Provide a canonical case-insensitive name for the configuration which also simplifies mapping alternative names to the canonical name.
 		this.SetAlias(featureName, featureName);

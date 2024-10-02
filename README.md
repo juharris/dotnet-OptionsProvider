@@ -128,17 +128,20 @@ using OptionsProvider;
 
 class MyController(IFeaturesContext context)
 {
-    public void InitializeContext(string[] enabledFeatures)
+    private void InitializeContext(string[] enabledFeatures)
     {
+        // Set the feature names for the current request.
+        // This is also where custom filtering for the features can be done.
+        // For example, one could filter out features that are not enabled for the current user.
         context.FeatureNames = enabledFeatures;
     }
 }
 ```
 
 Then while processing the request, `IFeaturesContext` will automatically be used to get the right configuration for the current request based on the enabled features.
-To use this method, `MyConfiguration` must have public setters for all of its properties.
 
-In your code, you can use `IOptionsSnapshot<MyConfiguration>` to get the right configuration for the current request based on the enabled features:
+You can use `IOptionsSnapshot<MyConfiguration>` to get the right configuration for the current request based on the enabled features.
+Example:
 ```csharp
 class MyClass(IOptionsSnapshot<MyConfiguration> options)
 {
@@ -148,6 +151,8 @@ class MyClass(IOptionsSnapshot<MyConfiguration> options)
     }
 }
 ```
+
+For this to work, `MyConfiguration` must have public setters for all of its properties, as shown above.
 
 If `enabledFeatures` is `["A", "B"]`, then `MyConfiguration` will be built in this order:
 1. Apply the default values the injected `IConfiguration`, i.e. the values from `appsettings.json` under `"config"`.

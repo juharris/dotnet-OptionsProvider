@@ -45,11 +45,49 @@ public sealed class OptionsProviderTests
 		aliases.Should().ContainKey("DeePeR");
 	}
 
+
+	[TestMethod]
+	public void Test_GetAllOptionsForAllFeatures()
+	{
+		var allconfigs = OptionsProviderBuilderTests.OptionsProvider.GetAllOptionsForAllFeatures<EntireConfig>();
+		allconfigs.Should().HaveCount(4);
+		allconfigs.Single(c => c.Metadata.Name == "example").Configuration!.Config.Should().BeEquivalentTo(ExampleMyConfiguration);
+	}
+
+	[TestMethod]
+	public void Test_GetAllOptions()
+	{
+		var allOptions = OptionsProviderBuilderTests.OptionsProvider.GetAllOptions<EntireConfig>();
+		Assert.IsNotNull(allOptions);
+		allOptions.Config.Should().BeEquivalentTo(DefaultMyConfiguration);
+		allOptions.NonCachedConfig.Should().BeEquivalentTo(DefaultMyConfiguration);
+
+		var allOptions2 = OptionsProviderBuilderTests.OptionsProvider.GetAllOptions<EntireConfig>();
+		Assert.AreSame(allOptions, allOptions2);
+	}
+
+	[TestMethod]
+	public void Test_GetAllOptions_WithFeatures()
+	{
+		var allOptions = OptionsProviderBuilderTests.OptionsProvider.GetAllOptions<EntireConfig>(["example"]);
+		Assert.IsNotNull(allOptions);
+		allOptions.Config.Should().BeEquivalentTo(ExampleMyConfiguration);
+		allOptions.NonCachedConfig.Should().BeEquivalentTo(DefaultMyConfiguration);
+
+		var allOptions2 = OptionsProviderBuilderTests.OptionsProvider.GetAllOptions<EntireConfig>(["example"]);
+		Assert.AreSame(allOptions, allOptions2);
+
+		allOptions = OptionsProviderBuilderTests.OptionsProvider.GetAllOptions<EntireConfig>(["sub_example"]);
+		Assert.IsNotNull(allOptions);
+		allOptions.Config.Should().BeEquivalentTo(SubExampleMyConfiguration);
+		allOptions.NonCachedConfig.Should().BeEquivalentTo(DefaultMyConfiguration);
+	}
+
 	[TestMethod]
 	public void Test_GetFeatureNames()
 	{
 		var featureNames = OptionsProviderBuilderTests.OptionsProvider.GetFeatureNames();
-		featureNames.Should().BeAssignableTo<ImmutableArray<string>>();
+		featureNames.Should().BeAssignableTo<IReadOnlyCollection<string>>();
 		featureNames.Should().BeEquivalentTo(["deeper_example", "deeper_example2", "example", "subdir/example"]);
 	}
 
