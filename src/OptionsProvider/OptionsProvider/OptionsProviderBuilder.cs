@@ -85,7 +85,7 @@ internal sealed class OptionsProviderBuilder(
 			.Concat(Directory.EnumerateFiles(rootPath, "*.yaml", SearchOption.AllDirectories))
 			.Concat(Directory.EnumerateFiles(rootPath, "*.yml", SearchOption.AllDirectories))
 			// Ensure that the files are loaded in a consistent order so that errors are consistent on different machines.
-			.Order();
+			.Order(StringComparer.Ordinal);
 
 		// Use async tasks to load files in parallel.
 		var fileConfigs = await Task.WhenAll(paths

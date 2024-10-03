@@ -3,7 +3,7 @@
 namespace OptionsProvider;
 
 /// <summary>
-/// The converted version of a loaded configuration file.
+/// The information about a feature to load.
 /// </summary>
 public sealed class FeatureConfiguration
 {
