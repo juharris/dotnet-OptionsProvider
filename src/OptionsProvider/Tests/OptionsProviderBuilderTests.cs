@@ -33,7 +33,11 @@ public sealed class OptionsProviderBuilderTests
 			{
 				AbsoluteExpiration = DateTime.MinValue,
 			})
-			.BuildServiceProvider();
+			.BuildServiceProvider(new ServiceProviderOptions()
+			{
+				ValidateOnBuild = true,
+				ValidateScopes = true,
+			});
 		OptionsProvider = ServiceProvider.GetRequiredService<IOptionsProvider>();
 	}
 
