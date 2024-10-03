@@ -49,9 +49,9 @@ public sealed class OptionsProviderTests
 	[TestMethod]
 	public void Test_GetAllOptionsForAllFeatures()
 	{
-		var allconfigs = OptionsProviderBuilderTests.OptionsProvider.GetAllOptionsForAllFeatures<EntireConfig>();
-		allconfigs.Should().HaveCount(4);
-		allconfigs.Single(c => c.Metadata.Name == "example").Configuration!.Config.Should().BeEquivalentTo(ExampleMyConfiguration);
+		var allOptions = OptionsProviderBuilderTests.OptionsProvider.GetAllOptionsForAllFeatures<EntireConfig>();
+		allOptions.Select(f => f.Metadata.Name).Should().Equal(OptionsProviderBuilderTests.OptionsProvider.GetFeatureNames());
+		allOptions.Single(f => f.Metadata.Name == "example").Configuration!.Config.Should().BeEquivalentTo(ExampleMyConfiguration);
 	}
 
 	[TestMethod]
@@ -88,7 +88,7 @@ public sealed class OptionsProviderTests
 	{
 		var featureNames = OptionsProviderBuilderTests.OptionsProvider.GetFeatureNames();
 		featureNames.Should().BeAssignableTo<IReadOnlyCollection<string>>();
-		featureNames.Should().BeEquivalentTo(["deeper_example", "deeper_example2", "example", "subdir/example"]);
+		featureNames.Should().Equal(["deeper_example", "deeper_example2", "example", "subdir/example"]);
 	}
 
 	[TestMethod]

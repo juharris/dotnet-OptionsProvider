@@ -1,7 +1,7 @@
 ﻿namespace OptionsProvider;
 
 /// <summary>
-/// Loads options from files.
+/// Loads options from files or custom sources.
 /// </summary>
 public interface IOptionsProviderBuilder
 {

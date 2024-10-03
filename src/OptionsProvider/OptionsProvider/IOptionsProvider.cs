@@ -3,7 +3,7 @@
 namespace OptionsProvider;
 
 /// <summary>
-/// Provides options given enabled feature names.
+/// Provides options that are configurable by feature names.
 /// </summary>
 public interface IOptionsProvider
 {
@@ -28,7 +28,7 @@ public interface IOptionsProvider
 	/// </summary>
 	/// <typeparam name="T">The type that holds all options. The type of the root of all options.</typeparam>
 	/// <returns>Each feature along with its configuration.</returns>
-	ICollection<FeatureConfigurationView<T>> GetAllOptionsForAllFeatures<T>();
+	ICollection<FeatureInfo<T>> GetAllOptionsForAllFeatures<T>();
 
 	/// <summary>
 	/// Gets all the options for all keys when the specified features are enabled.
