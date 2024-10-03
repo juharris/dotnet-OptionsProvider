@@ -43,7 +43,7 @@ public static class ServiceCollectionExtensions
 	}
 
 	/// <summary>
-	/// Enables providing a configuration object with <see cref="IOptionsSnapshot{TOptions}"/> for dependency injection.
+	/// Enables providing a configuration object with <see cref="IOptionsSnapshot{TOptions}"/> for dependency injection into scoped classes.
 	/// </summary>
 	/// <typeparam name="TOptions">The type of options to provide.</typeparam>
 	/// <param name="services">The current service collection for dependency injection.</param>

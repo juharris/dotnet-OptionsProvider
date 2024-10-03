@@ -3,7 +3,7 @@
 namespace OptionsProvider;
 
 /// <summary>
-/// Extra information about the group of options.
+/// Extra information about the options for a feature.
 /// </summary>
 public sealed class OptionsMetadata
 {
