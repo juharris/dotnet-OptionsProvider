@@ -2,6 +2,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Memory;
 using Microsoft.Extensions.DependencyInjection;
+using OptionsProvider.Tests.TestConfigs;
 
 namespace OptionsProvider.Tests;
 
@@ -10,10 +11,8 @@ public sealed class OptionsProviderBuilderTests
 {
 	// Won't be `null` when running tests.
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-#pragma warning disable CA2211 // Non-constant fields should not be visible
-	public static IServiceProvider ServiceProvider;
-	public static IOptionsProvider OptionsProvider;
-#pragma warning restore CA2211 // Non-constant fields should not be visible
+	internal static IServiceProvider ServiceProvider;
+	internal static IOptionsProvider OptionsProvider;
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
 	[AssemblyInitialize]
@@ -54,6 +53,35 @@ public sealed class OptionsProviderBuilderTests
 	public async Task Test_AddDirectoryAsync_with_Existing_Name()
 	{
 		var builder = ServiceProvider.GetRequiredService<IOptionsProviderBuilder>();
+		await Test_InvalidConfigurations(builder);
+	}
+
+	[TestMethod]
+	public async Task Test_Builder_Only()
+	{
+		// Ensure that we can get only a builder.
+		var configuration = new ConfigurationBuilder()
+			.AddJsonFile("appsettings.json")
+			.Build();
+		using var serviceProvider = new ServiceCollection()
+			.AddSingleton<IConfiguration>(configuration)
+			.AddOptionsProviderBuilder()
+			.BuildServiceProvider();
+		var optionsProviderBuilder = serviceProvider.GetRequiredService<IOptionsProviderBuilder>();
+
+		await Test_InvalidConfigurations(optionsProviderBuilder);
+		Test_SetConfigurationSource_with_Existing_Name(optionsProviderBuilder);
+	}
+
+	[TestMethod]
+	public void Test_SetConfigurationSource_with_Existing_Name()
+	{
+		var builder = ServiceProvider.GetRequiredService<IOptionsProviderBuilder>();
+		Test_SetConfigurationSource_with_Existing_Name(builder);
+	}
+
+	private static async Task Test_InvalidConfigurations(IOptionsProviderBuilder builder)
+	{
 		var action = () => builder.AddDirectoryAsync("InvalidConfigurations");
 		await action.Should().ThrowAsync<InvalidOperationException>()
 			.WithMessage($"Error loading the configuration file at \"{Path.Combine("InvalidConfigurations", "other example.json")}\".")
@@ -61,8 +89,7 @@ public sealed class OptionsProviderBuilderTests
 			.WithMessage($"The alias \"other example\" for \"other example\" is already used as an alias or feature name.");
 	}
 
-	[TestMethod]
-	public void Test_SetConfigurationSource_with_Existing_Name()
+	private static void Test_SetConfigurationSource_with_Existing_Name(IOptionsProviderBuilder builder)
 	{
 		var metadata = new OptionsMetadata
 		{
@@ -70,7 +97,6 @@ public sealed class OptionsProviderBuilderTests
 			Aliases = ["alias"],
 			Owners = "owner",
 		};
-		var builder = ServiceProvider.GetRequiredService<IOptionsProviderBuilder>();
 		var configSource = new MemoryConfigurationSource
 		{
 			InitialData = new Dictionary<string, string?>
