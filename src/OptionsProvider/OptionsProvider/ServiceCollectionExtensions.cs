@@ -30,19 +30,23 @@ public static class ServiceCollectionExtensions
 	/// Uses <see cref="AddOptionsProviderBuilder(IServiceCollection)"/>.
 	/// </remarks>
 	/// <param name="services">The current service collection for dependency injection.</param>
-	/// <param name="path">The base directory to start searching for files that represent features.</param>
+	/// <param name="path">(optional) The base directory to start searching for files that represent features.</param>
 	/// <param name="featureConfigurations">(optional) Additional custom configurations for features.</param>
 	/// <returns>The <see cref="IServiceCollection"/> for chaining calls.</returns>
 	public static IServiceCollection AddOptionsProvider(
 		this IServiceCollection services,
-		string path,
+		string? path = null,
 		IEnumerable<FeatureConfiguration>? featureConfigurations = null)
 	{
 		services.AddOptionsProviderBuilder();
 		services.TryAddSingleton<IOptionsProvider>(serviceProvider =>
 		{
 			var builder = serviceProvider.GetRequiredService<IOptionsProviderBuilder>();
-			builder.AddDirectoryAsync(path).Wait();
+			if (path is not null)
+			{
+				builder.AddDirectoryAsync(path).Wait();
+			}
+
 			if (featureConfigurations is not null)
 			{
 				foreach (var featureConfiguration in featureConfigurations)

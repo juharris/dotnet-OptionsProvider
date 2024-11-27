@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using OptionsProvider.Tests.TestConfigs;
@@ -353,5 +354,25 @@ public sealed class OptionsProviderTests
 		};
 		config = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["deePer", "DEEPER2"]);
 		config.Should().BeEquivalentTo(expectedDeeper2);
+	}
+
+	[TestMethod]
+	public void Test_No_Path()
+	{
+		// Ensure that we can get only a builder.
+		var configuration = new ConfigurationBuilder()
+			.AddJsonFile("appsettings.json")
+			.Build();
+		using var serviceProvider = new ServiceCollection()
+			.AddSingleton<IConfiguration>(configuration)
+			.AddOptionsProvider()
+			.BuildServiceProvider();
+		var optionsProvider = serviceProvider.GetRequiredService<IOptionsProvider>();
+		var options = optionsProvider.GetOptions<MyConfiguration>("config");
+		options.Should().BeEquivalentTo(DefaultMyConfiguration);
+
+		var action = () => optionsProvider.GetOptions<MyConfiguration>("config", ["example"]);
+		action.Should().Throw<InvalidOperationException>()
+			.WithMessage("The given feature name \"example\" is not a known feature.");
 	}
 }

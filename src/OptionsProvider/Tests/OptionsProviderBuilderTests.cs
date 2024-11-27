@@ -50,6 +50,13 @@ public sealed class OptionsProviderBuilderTests
 	}
 
 	[TestMethod]
+	public async Task Test_AddDirectoryAsync_with_Existing_Name()
+	{
+		var builder = ServiceProvider.GetRequiredService<IOptionsProviderBuilder>();
+		await Test_InvalidConfigurations(builder);
+	}
+
+	[TestMethod]
 	public async Task Test_Builder_Only()
 	{
 		// Ensure that we can get only a builder.
@@ -64,13 +71,6 @@ public sealed class OptionsProviderBuilderTests
 
 		await Test_InvalidConfigurations(optionsProviderBuilder);
 		Test_SetConfigurationSource_with_Existing_Name(optionsProviderBuilder);
-	}
-
-	[TestMethod]
-	public async Task Test_AddDirectoryAsync_with_Existing_Name()
-	{
-		var builder = ServiceProvider.GetRequiredService<IOptionsProviderBuilder>();
-		await Test_InvalidConfigurations(builder);
 	}
 
 	[TestMethod]
