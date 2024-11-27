@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using OptionsProvider.Tests.TestConfigs;
 
 namespace OptionsProvider.Tests;
 

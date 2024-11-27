@@ -1,4 +1,4 @@
-﻿namespace OptionsProvider.Tests;
+﻿namespace OptionsProvider.Tests.TestConfigs;
 
 internal sealed class EntireConfig
 {

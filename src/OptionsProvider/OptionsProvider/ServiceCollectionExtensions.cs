@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
 namespace OptionsProvider;
@@ -10,8 +11,24 @@ namespace OptionsProvider;
 public static class ServiceCollectionExtensions
 {
 	/// <summary>
+	/// Sets up <see cref="IOptionsProviderBuilder"/> to be ready for injecting as a dependency.
+	/// </summary>
+	/// <param name="services">The current service collection for dependency injection.</param>
+	/// <returns>The <see cref="IServiceCollection"/> for chaining calls.</returns>
+	public static IServiceCollection AddOptionsProviderBuilder(
+		this IServiceCollection services)
+	{
+		services.AddMemoryCache();
+		services.TryAddTransient<IOptionsProviderBuilder, OptionsProviderBuilder>();
+		return services;
+	}
+
+	/// <summary>
 	/// Sets up <see cref="IOptionsProvider"/> to be ready for injecting as a dependency.
 	/// </summary>
+	/// <remarks>
+	/// Uses <see cref="AddOptionsProviderBuilder(IServiceCollection)"/>.
+	/// </remarks>
 	/// <param name="services">The current service collection for dependency injection.</param>
 	/// <param name="path">The base directory to start searching for files that represent features.</param>
 	/// <param name="featureConfigurations">(optional) Additional custom configurations for features.</param>
@@ -21,9 +38,8 @@ public static class ServiceCollectionExtensions
 		string path,
 		IEnumerable<FeatureConfiguration>? featureConfigurations = null)
 	{
-		services.AddMemoryCache();
-		services.AddTransient<IOptionsProviderBuilder, OptionsProviderBuilder>();
-		services.AddSingleton<IOptionsProvider>(serviceProvider =>
+		services.AddOptionsProviderBuilder();
+		services.TryAddSingleton<IOptionsProvider>(serviceProvider =>
 		{
 			var builder = serviceProvider.GetRequiredService<IOptionsProviderBuilder>();
 			builder.AddDirectoryAsync(path).Wait();
@@ -37,7 +53,7 @@ public static class ServiceCollectionExtensions
 			return builder.Build();
 		});
 
-		services.AddScoped<IFeaturesContext, FeaturesContext>();
+		services.TryAddScoped<IFeaturesContext, FeaturesContext>();
 
 		return services;
 	}

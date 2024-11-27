@@ -1,4 +1,4 @@
-﻿namespace OptionsProvider.Tests;
+﻿namespace OptionsProvider.Tests.TestConfigs;
 
 /// <summary>
 /// An example configuration for tests that looks the same as <see cref="MyConfiguration"/> but is not cached.
