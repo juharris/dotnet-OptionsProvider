@@ -79,6 +79,15 @@ internal sealed class OptionsProviderBuilder(
 		return this;
 	}
 
+	public IOptionsProviderBuilder AddDirectory(string rootPath)
+	{
+		// Just use a simple wrapper around the async version for now
+		// to help those using the library avoid blocking calls and suppressing errors or warnings in their code.
+		// Eventually we could make a proper implementation without explicitly blocking here.
+		this.AddDirectoryAsync(rootPath).Wait();
+		return this;
+	}
+
 	public async Task<IOptionsProviderBuilder> AddDirectoryAsync(string rootPath)
 	{
 		var paths = Directory.EnumerateFiles(rootPath, "*.json", SearchOption.AllDirectories)

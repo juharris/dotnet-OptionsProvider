@@ -29,7 +29,18 @@ public interface IOptionsProviderBuilder
 	IOptionsProviderBuilder AddConfigurationSource(FeatureConfiguration featureConfiguration);
 
 	/// <summary>
-	/// Loads and options from files in parallel.
+	/// Loads and options from files, potentially in parallel.
+	/// </summary>
+	/// <param name="rootPath">The base directory to find configuration files.</param>
+	/// <returns>The loaded options.</returns>
+	/// <remarks>
+	/// Currently "*.json", "*.yaml", and "*.yml" files are supported.
+	/// </remarks>
+	/// <returns>The current builder.</returns>
+	IOptionsProviderBuilder AddDirectory(string rootPath);
+
+	/// <summary>
+	/// Loads and options from files, potentially in parallel.
 	/// </summary>
 	/// <param name="rootPath">The base directory to find configuration files.</param>
 	/// <returns>The loaded options.</returns>

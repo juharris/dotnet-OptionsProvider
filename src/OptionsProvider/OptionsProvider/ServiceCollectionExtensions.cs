@@ -44,7 +44,7 @@ public static class ServiceCollectionExtensions
 			var builder = serviceProvider.GetRequiredService<IOptionsProviderBuilder>();
 			if (path is not null)
 			{
-				builder.AddDirectoryAsync(path).Wait();
+				builder.AddDirectory(path);
 			}
 
 			if (featureConfigurations is not null)
