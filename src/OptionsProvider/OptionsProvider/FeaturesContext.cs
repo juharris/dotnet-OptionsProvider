@@ -6,7 +6,7 @@
 public interface IFeaturesContext
 {
 	/// <summary>
-	/// The enabled feature names.
+	/// The names of the currently enabled features.
 	/// </summary>
 	IReadOnlyList<string>? FeatureNames { get; set; }
 }

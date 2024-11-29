@@ -10,7 +10,7 @@
 public sealed class FeatureInfo<T>
 {
 	/// <summary>
-	/// The metadata for the feature.
+	/// General information about the options for this feature.
 	/// </summary>
 	public required OptionsMetadata Metadata { get; init; }
 

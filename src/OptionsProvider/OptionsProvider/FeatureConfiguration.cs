@@ -8,12 +8,12 @@ namespace OptionsProvider;
 public sealed class FeatureConfiguration
 {
 	/// <summary>
-	/// Information about the options for this feature.
+	/// General information about the options for this feature.
 	/// </summary>
 	public required OptionsMetadata Metadata { get; init; }
 
 	/// <summary>
-	/// The configuration.
+	/// The configuration for the feature.
 	/// </summary>
 	public required IConfigurationSource Source { get; init; }
 }

@@ -99,7 +99,7 @@ services
     .ConfigureOptions<MyConfiguration>("config")
 ```
 
-There are two simple ways to get the right version of `MyConfiguration` for the current request based on the enabled features.
+There are a few simple ways to get the right version of `MyConfiguration` for the current request based on the enabled features.
 
 ## Using `IOptionsProvider` Directly
 You can the inject `IOptionsProvider` into classes to get options for a given set of features.
@@ -158,6 +158,25 @@ If `enabledFeatures` is `["A", "B"]`, then `MyConfiguration` will be built in th
 1. Apply the default values the injected `IConfiguration`, i.e. the values from `appsettings.json` under `"config"`.
 2. Apply the values from `Configurations/feature_A.json`.
 3. Apply the values from `Configurations/feature_B/initial.yaml`.
+
+## Using A Builder
+Using `IOptionsProviderBuilder` directly can be helpful if you are working in a large service and do not want to use `IOptionsProvider` as a global or shared singleton for all options.
+
+Configurations can be loaded when setting up your DI container or in a constructor.
+For example:
+```csharp
+internal sealed class MyProvider
+{
+    private readonly IOptionsProvider _optionsProvider;
+
+    public MyProvider(IOptionsProviderBuilder builder)
+    {
+        _optionsProvider = builder
+            .AddDirectory("Configurations")
+            .Build();
+    }
+}
+```
 
 ## Caching
 `["A", "B"]` is treated the same as `["a", "FeAtuRe_B/iNiTiAl"]` because using an alias is equivalent to using the path to the file and names and aliases are case-insensitive.

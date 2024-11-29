@@ -11,7 +11,7 @@ public sealed class CacheOptionsBuilderInput
 	public required string OptionsKey { get; init; }
 
 	/// <summary>
-	/// Indicates the features that are enabled for the current scope.
+	/// The features that are enabled for the current scope.
 	/// </summary>
 	public required IFeaturesContext FeaturesContext { get; init; }
 }
