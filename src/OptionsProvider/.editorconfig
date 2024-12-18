@@ -45,6 +45,10 @@ dotnet_diagnostic.IDE0065.severity = error
 dotnet_code_quality_unused_parameters = all
 dotnet_diagnostic.IDE0060.severity = error
 
+# Primary constructors are fine sometimes, but they do not need to always be used.
+# IDE0290: Use primary constructor
+dotnet_diagnostic.IDE0290.severity = silent
+
 # Multiple blank lines in a row.
 dotnet_diagnostic.SA1507.severity = error
 
