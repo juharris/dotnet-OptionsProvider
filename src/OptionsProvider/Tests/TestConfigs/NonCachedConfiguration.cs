@@ -14,4 +14,5 @@ internal sealed class NonCachedConfiguration
 	public MyDeeperObject? DeeperObject { get; set; }
 	public MyDeeperObject[]? DeeperObjects { get; set; }
 	public int? OptionalNumber { get; set; }
+	public ConfigurableString? MyConfigurableString { get; set; }
 }
