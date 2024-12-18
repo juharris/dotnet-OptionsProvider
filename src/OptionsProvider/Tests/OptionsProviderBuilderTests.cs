@@ -24,8 +24,8 @@ public sealed class OptionsProviderBuilderTests
 
 		ServiceProvider = new ServiceCollection()
 			.AddSingleton<IConfiguration>(configuration)
-			.AddOptionsProvider("Configurations")
-			.ConfigureOptions<MyConfiguration>("config")
+			.AddOptionsProvider(path: "Configurations")
+			.ConfigureOptions<MyConfiguration>(optionsKey: "config")
 			.ConfigureOptions<NonCachedConfiguration>(
 			"nonCachedConfig",
 			_ => new MemoryCacheEntryOptions
