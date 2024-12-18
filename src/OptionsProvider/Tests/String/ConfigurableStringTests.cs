@@ -15,8 +15,11 @@ public sealed class ConfigurableStringTests
 	[DataRow("Hello World Hello World", "{{1 and 2}} {{1 and 2}}")]
 	[DataRow("|Hello World| {{1}", "|{{1 and 2}}| {{1}")]
 	[DataRow("Hello}", "{{1}}}")]
-	// TODO Think about escaping or how to get raw braces.
-	[DataRow("{{{1}}}", "{{{1}}}")]
+	[DataRow("{Hello}", "{{{1}}}")]
+	[DataRow("{{BRACES}}", "{{braces}}")]
+	[DataRow("{{wtvWorld}}", "{{wtv{{2}}}}")]
+	[DataRow("One World", "{{1{{2}}}}")]
+	[DataRow("This is a long string that someone might build in a typical example for displaying in their application or logging.", "{{empty}}{{first}}{{}}{{rest}}{{}}{{.}}{{}}")]
 	[TestMethod]
 	public void ConfigurableString_Test(string expected, string template)
 	{
@@ -24,7 +27,19 @@ public sealed class ConfigurableStringTests
 		{
 			["1"] = "Hello",
 			["2"] = "World",
+			["1World"] = "One World",
 			["1 and 2"] = "{{1}} {{2}}",
+			["braces"] = "{{BRACES}}",
+			["1{{2}}"] = "{{1{{2}}}}",
+			["verb"] = "build",
+			["noun "] = "long string ",
+			[string.Empty] = string.Empty,
+			["empty"] = string.Empty,
+			[" "] = " ",
+			["space"] = " ",
+			["first"] = "This is a {{noun }}that someone might {{verb}} in a {{empty}}typical{{space}}example",
+			["rest"] = " for{{ }}displaying in their appli{{}}cation or logging",
+			["."] = ".",
 		});
 
 		Assert.AreEqual(expected, configurableString.Value);
