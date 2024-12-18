@@ -18,23 +18,31 @@ public sealed class ConfigurableString
 	/// The keys should not contain the &quot;{{&quot; and &quot;}}&quot;.
 	/// Values may contain slots that will be replaced recursively.
 	/// </param>
+	/// <param name="startDelimiter"></param>
+	/// <param name="endDelimiter"></param>
 	public ConfigurableString(
 		string? template,
-		IReadOnlyDictionary<string, string> values)
+		IReadOnlyDictionary<string, string> values,
+		string startDelimiter = "{{",
+		string endDelimiter = "}}")
 	{
-		this.Value = new(() => BuildValue(template, values));
+		this._value = new(() => BuildValue(template, values, startDelimiter, endDelimiter));
 	}
 
 	/// <summary>
 	/// The built value of the configurable string.
 	/// </summary>
-	// TODO RENAME
-	public Lazy<string?> Value { get; private set; }
+	public string? Value => this._value.Value;
+
+	private readonly Lazy<string?> _value;
 
 	private static string? BuildValue(
 		string? template,
-		IReadOnlyDictionary<string, string> values)
+		IReadOnlyDictionary<string, string> values,
+		string startDelimiter,
+		string endDelimiter)
 	{
+		const int maxLoopCount = 10_000;
 		if (template is null)
 		{
 			return null;
@@ -44,33 +52,41 @@ public sealed class ConfigurableString
 		// More sophisticated implementations can use libraries like Fluid, Handlebars, Scriban, etc.
 		// We do not want to add such dependencies to this mostly simple project.
 		string result = template;
-		var start = 0;
-		while (true)
+		var slotStartIndex = 0;
+
+		var loopIndex = 0;
+		for (; loopIndex < maxLoopCount; ++loopIndex)
 		{
-			start = result.IndexOf("{{", start, StringComparison.Ordinal);
-			if (start == -1)
+			slotStartIndex = result.IndexOf(startDelimiter, slotStartIndex, StringComparison.Ordinal);
+			if (slotStartIndex == -1)
 			{
 				break;
 			}
 
-			var keyStart = start + 2;
-			var end = result.IndexOf("}}", keyStart, StringComparison.Ordinal);
-			if (end == -1)
+			var keyStart = slotStartIndex + startDelimiter.Length;
+			var slotEndIndex = result.IndexOf(endDelimiter, keyStart, StringComparison.Ordinal);
+			if (slotEndIndex == -1)
 			{
 				break;
 			}
 
-			var key = result[keyStart..end];
+			var key = result[keyStart..slotEndIndex];
 			if (values.TryGetValue(key, out var value))
 			{
 				// Only replace it if the value is found, otherwise assume that the {{key}} is part of the string.
-				result = $"{result.AsSpan(0, start)}{value}{result.AsSpan(end + 2)}";
+				result = $"{result.AsSpan(0, slotStartIndex)}{value}{result.AsSpan(slotEndIndex + endDelimiter.Length)}";
 				// Do not update the start index, because the replaced value may contain a slot to replace.
 			}
 			else
 			{
-				start = end + 2;
+				// slotStartIndex = slotStartIndex + startDelimiter.Length;
+				slotStartIndex = slotEndIndex + endDelimiter.Length;
 			}
+		}
+
+		if (loopIndex == maxLoopCount)
+		{
+			throw new InvalidOperationException($"The replacement loop count exceeded the maximum allowed iterations ({maxLoopCount}). There was likely a recursive loop using the template and values.");
 		}
 
 		return result;
