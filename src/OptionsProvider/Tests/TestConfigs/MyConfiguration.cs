@@ -1,4 +1,6 @@
-﻿namespace OptionsProvider.Tests.TestConfigs;
+﻿using OptionsProvider.String;
+
+namespace OptionsProvider.Tests.TestConfigs;
 
 /// <summary>
 /// An example configuration for tests.
