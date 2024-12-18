@@ -5,8 +5,8 @@ metadata:
 options:
     config:
         myConfigurableString:
-            template: "{{1}}{{2}}{{rest}}"
+            template: "{{1}}{{2}}{{remainder}}"
             values:
                 "1": "Hello "
                 "2": "World"
-                "rest": " Today will be better than yesterday."
+                remainder: " Today will be better than yesterday."

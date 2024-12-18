@@ -215,18 +215,18 @@ For example, if the following features are applied:
 `Configurations/feature_A.yaml`:
 ```yaml
 options:
-  myConfig:
-    myArray:
-      - 1
-      - 2
+    myConfig:
+        myArray:
+            - 1
+            - 2
 ```
 
 `Configurations/feature_B.yaml`:
 ```yaml
 options:
-  myConfig:
-    myArray:
-      - 3
+    myConfig:
+        myArray:
+            - 3
 ```
 
 The resulting `MyConfiguration` for `["feature_A", "feature_B"]` will have `myArray` set to `[3, 2]` because the second list is applied after the first list.
@@ -258,8 +258,44 @@ Values are overwritten if the same key is used in a feature that is applied late
 To delete a value for a key, one could set the value to `null` and then have custom logic in the service to ignore values that are `null`.
 
 ### Building Strings
-_Ideas using a templating library and a dictionary coming soon._
-One could concatenate values in an array or object to build a string, but this is not recommended for strings that many configurations would want to customize because it would be difficult to maintain since other files will need to be cross-referenced.
+Use [`ConfigurableString`][ConfigurableString] to customize string values using templates and slots.
+This implementation uses simple string operations to build the value because this should work for most cases.
+More sophisticated implementations can use libraries like Fluid, Handlebars, Scriban, etc.
+We do not want to add such dependencies by default to this mostly simple project.
+
+Example:
+```csharp
+internal sealed class MyConfiguration
+{
+    public ConfigurableString? MyString { get; set; }
+}
+```
+
+```yaml
+options:
+    myConfig:
+        myString:
+            template: "{{greeting}}{{subject}}{{remainder}}"
+            values:
+                greeting: "Hello "
+                subject: "World!"
+                remainder: ""
+```
+
+The resulting value for `MyString.Value` with the feature enabled will be `"Hello World!"`.
+
+To override only the subject:
+```yaml
+options:
+    myConfig:
+        myString:
+            values:
+                subject: "Everyone!"
+```
+
+The resulting value for `MyString.Value` with the feature enabled will be `"Hello Everyone!"`.
+
+Another simple way to build a string could be to concatenate values from an array or dictionary, but this is not recommended for strings that many configurations would want to customize because it would be difficult to maintain since other files will need to be cross-referenced much more in order to understand the order that values might be used.
 
 # Development
 ## Code Formatting
@@ -283,5 +319,6 @@ dotnet nuget push OptionsProvider/bin/Release/OptionsProvider.*.nupkg  --source 
 ```
 
 [azure-app-configuration]: https://learn.microsoft.com/en-us/azure/azure-app-configuration/
+[ConfigurableString]: ./src/OptionsProvider/OptionsProvider/String/ConfigurableString.cs
 [custom-configuration-provider]: https://learn.microsoft.com/en-us/dotnet/core/extensions/custom-configuration-provider
 [MemoryCacheEntryOptions]: https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.caching.memory.memorycacheentryoptions
