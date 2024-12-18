@@ -275,11 +275,13 @@ internal sealed class MyConfiguration
 options:
     myConfig:
         myString:
-            template: "{{greeting}}{{subject}}{{remainder}}"
+            template: "{{root}}"
             values:
+                root: "{{greeting}}{{subject}}{{conclusion}}{{end}}"
                 greeting: "Hello "
                 subject: "World!"
-                remainder: ""
+                conclusion: " I hope you have a good day and enjoy yourself and your time."
+                end: ""
 ```
 
 The resulting value for `MyString.Value` with the feature enabled will be `"Hello World!"`.
@@ -296,6 +298,33 @@ options:
 The resulting value for `MyString.Value` with the feature enabled will be `"Hello Everyone!"`.
 
 Another simple way to build a string could be to concatenate values from an array or dictionary, but this is not recommended for strings that many configurations would want to customize because it would be difficult to maintain since other files will need to be cross-referenced much more in order to understand the order that values might be used.
+
+#### Best Practices for Collaborating on Strings
+* The default template should not have literal values that are not slots.
+This makes it easy to completely override the entire string by overriding the root slot for quick experimentation of a proof of concept.
+* If you want to experiment with changing part of a value, then **DO NOT** override the entire value because TODO REASON.
+Instead, change the specific part that you want to change to a slot, set the default value for that slot to the current value, and then override that slot.
+For example, to experiment with changing `"good"` to `"great"` in `conclusion: " I hope you have a good day and enjoy yourself and your time."`, change the default configuration to:
+    ```yaml
+    options:
+        myConfig:
+            myString:
+                ...
+                values:
+                    conclusion: " I hope you have a {{adjective}} day and enjoy yourself and your time."
+                    adjective: "good"
+    ```
+
+    Then in a new configuration:
+    ```yaml
+    options:
+        myConfig:
+            myString:
+                values:
+                    adjective: "great"
+    ```
+
+Of course, now you should probably also add a slot for `"a"` since it might need to be `"an"` if the adjective starts with a vowel.
 
 # Development
 ## Code Formatting
