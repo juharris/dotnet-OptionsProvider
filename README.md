@@ -156,7 +156,7 @@ class MyClass(IOptionsSnapshot<MyConfiguration> options)
 For this to work, `MyConfiguration` must have public setters for all of its properties, as shown above.
 
 If `enabledFeatures` is `["A", "B"]`, then `MyConfiguration` will be built in this order:
-1. Apply the default values the injected `IConfiguration`, i.e. the values from `appsettings.json` under `"myConfig"`.
+1. Apply the default values the injected `IConfiguration`, i.e. the values from `appsettings.json` within `"myConfig"`.
 2. Apply the values from `Configurations/feature_A.json`.
 3. Apply the values from `Configurations/feature_B/initial.yaml`.
 
@@ -197,7 +197,7 @@ In your .csproj files with the `Configurations` folder, add a section like:
 </ItemGroup>
 ```
 
-or if there are already rules about including files, but the latest configuration file for a feature isn't found, you can try:
+or if there are already rules about including files, but the latest configuration file for a feature is not found, you can try:
 ```xml
 <ItemGroup>
   <None Include="Configurations/**">
