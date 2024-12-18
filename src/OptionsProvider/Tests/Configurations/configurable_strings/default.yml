@@ -1,0 +1,12 @@
+metadata:
+    # This is an example that is also used in tests.
+    isPersistent: true
+    owners: Justin@site.com
+options:
+    config:
+        myConfigurableString:
+            template: "{{1}}{{2}}{{rest}}"
+            values:
+                "1": "Hello "
+                "2": "World"
+                "rest": " Today will be better than yesterday."
