@@ -258,7 +258,18 @@ Values are overwritten if the same key is used in a feature that is applied late
 To delete a value for a key, one could set the value to `null` and then have custom logic in the service to ignore values that are `null`.
 
 ### Building Strings
-Use [`ConfigurableString`][ConfigurableString] to customize string values using templates and slots.
+Use [`ConfigurableString`][ConfigurableString] to customize string values using templates and slots that are recursively replaced with values.
+For example:\
+`"{{root}}"`\
+➡️ `"{{greeting}}{{subject}}{{conclusion}}{{end}}"`\
+➡️ `"Hello {{subject}}{{conclusion}}{{end}}"`\
+➡️ `"Hello World!{{conclusion}}{{end}}"`\
+➡️ `"Hello World! I hope you have a {{adjective}} day and enjoy yourself and your time.{{end}}"`\
+➡️ `"Hello World! I hope you have a good day and enjoy yourself and your time.{{end}}"`\
+➡️ `"Hello World! I hope you have a good day and enjoy yourself and your time."`
+
+By default, `"{{"` and `"}}"` are used as delimiters for slots, but these can be customized as shown below.
+
 This implementation uses simple string operations to build the string value because these simple operations be sufficient for most cases.
 More sophisticated implementations can use libraries like Fluid, Handlebars, Scriban, etc.
 We do not want to add such dependencies by default to this mostly minimal library.
@@ -300,6 +311,21 @@ options:
 ```
 
 The resulting value for `MyString.Value` with the features `["default", "subject_everyone"]` enabled will be: `"Hello Everyone! I hope you have a good day and enjoy yourself and your time."`.
+
+Delimiters can be customized:
+```yaml
+options:
+    myConfig:
+        myString:
+            template: "<root>"
+            values:
+                root: "<greeting><subject><introduction><conclusion><end>"
+                introduction: " I am the app."
+                startDelimiter: "<",
+                endDelimiter: ">",
+```
+
+The resulting value for `MyString.Value` will be: `"Hello World! I am the app. I hope you have a good day and enjoy yourself and your time."`.
 
 > [!NOTE]
 > This implementation to build strings is meant to be a simple to handle most cases.
