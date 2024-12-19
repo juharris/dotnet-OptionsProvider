@@ -1,4 +1,6 @@
-﻿namespace OptionsProvider.Tests.TestConfigs;
+﻿using OptionsProvider.String;
+
+namespace OptionsProvider.Tests.TestConfigs;
 
 /// <summary>
 /// An example configuration for tests that looks the same as <see cref="MyConfiguration"/> but is not cached.
@@ -14,4 +16,5 @@ internal sealed class NonCachedConfiguration
 	public MyDeeperObject? DeeperObject { get; set; }
 	public MyDeeperObject[]? DeeperObjects { get; set; }
 	public int? OptionalNumber { get; set; }
+	public ConfigurableString? MyConfigurableString { get; set; }
 }

@@ -22,7 +22,12 @@ trim_trailing_whitespace = true
 
 csharp_style_namespace_declarations = file_scoped:error
 
+# Nullables
+# CS8602: Dereference of a possibly null reference.
 dotnet_diagnostic.CS8602.severity = error
+
+# CS8625: Cannot convert null literal to non-nullable reference type.
+dotnet_diagnostic.CS8625.severity = error
 
 # IDE0003: Remove qualification
 # Use `this` for members:
@@ -44,6 +49,10 @@ dotnet_diagnostic.IDE0065.severity = error
 # Remove unused parameter (IDE0060)
 dotnet_code_quality_unused_parameters = all
 dotnet_diagnostic.IDE0060.severity = error
+
+# Primary constructors are fine sometimes, but they do not need to always be used.
+# IDE0290: Use primary constructor
+dotnet_diagnostic.IDE0290.severity = silent
 
 # Multiple blank lines in a row.
 dotnet_diagnostic.SA1507.severity = error
