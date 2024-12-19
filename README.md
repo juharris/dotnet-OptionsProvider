@@ -270,12 +270,12 @@ For example:\
 
 By default, `"{{"` and `"}}"` are used as delimiters for slots, but these can be customized as shown below.
 
-This implementation uses simple string operations to build the string value because these simple operations be sufficient for most cases.
+This implementation uses simple string operations to build the string value because these simple operations should be sufficient for most cases.
 More sophisticated implementations can use libraries like Fluid, Handlebars, Scriban, etc.
 We do not want to add such dependencies by default to this mostly minimal library.
 Perhaps extensions to this library could be published in the future.
-It's important to build strings that may be customized in a ways that fosters collaboration, otherwise, it is too tempting to copy long strings and make small changes to a specific part which can lead to a lot of duplication and maintenance issues.
-Similar strings would end up in many places, resulting it bifurcation of important parts, making it difficult to update many strings when a change is needed.
+It's important to build strings that may be customized in a way that fosters collaboration, otherwise, it is too tempting to copy long strings and make small changes to a specific part which can lead to a lot of duplication and maintenance issues.
+Similar strings would end up in many places, resulting in bifurcation of important parts, making it difficult to update many strings when a change is needed.
 
 Example:
 ```csharp
@@ -301,7 +301,7 @@ options:
 
 The resulting value for `MyString.Value` will be: `"Hello World! I hope you have a good day and enjoy yourself and your time."`.
 
-To override only the subject in `subject_everyone.yaml`:
+To override only the subject, `subject_everyone.yaml`:
 ```yaml
 options:
     myConfig:
@@ -312,7 +312,7 @@ options:
 
 The resulting value for `MyString.Value` with the features `["default", "subject_everyone"]` enabled will be: `"Hello Everyone! I hope you have a good day and enjoy yourself and your time."`.
 
-Delimiters can be customized:
+Delimiters can be customized. Example:
 ```yaml
 options:
     myConfig:
@@ -328,7 +328,7 @@ options:
 The resulting value for `MyString.Value` will be: `"Hello World! I am the app. I hope you have a good day and enjoy yourself and your time."`.
 
 > [!NOTE]
-> This implementation to build strings is meant to be a simple to handle most cases.
+> This implementation to build strings is meant to be a simple implementation to handle most cases.
 It is not meant to handle every type of edge case with every possible delimiter.
 It is not meant to handle complex cases like other libraries such as Fluid, Handlebars, Scriban, etc. might handle.
 We may change and optimization the logic to suit typical cases, but anyone relying on odd behavior such as the delimiters within the delimiters (`"{{slotA{{slotB}}}}"`) may not get consistent results in a backwards compatible way after library updates.
@@ -348,7 +348,7 @@ For example, if we set `"conclusion": ""`, then `"{{greeting}}{{subject}}{{concl
 \
 For example, if we set `"conclusion": null`, then `"{{greeting}}{{subject}}{{conclusion}}"` will become `"Hello World!{{conclusion}}"`.
 
-* If we want to experiment with changing a small part of a value for a slot, then **DO NOT** override the entire value and only change that one small part because this will make maintaining such long copied strings across many files difficult, the "copypasta" problem.
+* If we want to experiment with changing a small part of a value for a slot, then **DO NOT** override the entire value and only change that one small part in your configuration because this will make maintaining such long copied strings across many files difficult, the "copypasta" problem.
 Inevitably, the same long string will be copied and modified in many places, leading to bifurcation of important parts and making it difficult to update many strings when a change to one part is needed, for example, after a successful experiment with changing another part of the string.
 It needs to be seamless to update the default value for most of the string that is not desired to be changed for every experiment.\
 \
@@ -384,14 +384,12 @@ In `default.yaml`:
     Of course, now you should probably also convert `"a"` to a slot since it might need to overridden to `"an"` if the adjective starts with a vowel.
 
 * Use JSON files for managing large configurations that many may want to customize because it is easier to see the desired structure, validate the structure, and automatically format the structure.
-It is also easier to manage merge conflicts in JSON files.
+It is also easier to resolve merge conflicts in JSON files because the format can be validated easily.
 Using YAML files is fine for short configurations for a couple of values or configurations that are not expected to be customized often.
 
 * Unicode in YAML files: Use a later version of `YamlDotNet` in your project, for example: `<PackageReference Include="YamlDotNet" Version="16.2.1" />`.
-Emojis with Unicode might work well in YAML files by default because this library only requires an old version of `YamlDotNet` in order be compatible with older projects.
-Alternatively, use JSON files for managing Unicode strings.
-
-
+For example, emojis and other characters in Unicode might not work well in YAML files by default because this library only requires an old version of `YamlDotNet` in order be compatible with older projects.
+Alternatively, use JSON files for managing strings beyond ASCII characters.
 
 # Development
 ## Code Formatting
