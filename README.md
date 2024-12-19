@@ -215,18 +215,18 @@ For example, if the following features are applied:
 `Configurations/feature_A.yaml`:
 ```yaml
 options:
-  myConfig:
-    myArray:
-      - 1
-      - 2
+    myConfig:
+        myArray:
+            - 1
+            - 2
 ```
 
 `Configurations/feature_B.yaml`:
 ```yaml
 options:
-  myConfig:
-    myArray:
-      - 3
+    myConfig:
+        myArray:
+            - 3
 ```
 
 The resulting `MyConfiguration` for `["feature_A", "feature_B"]` will have `myArray` set to `[3, 2]` because the second list is applied after the first list.
@@ -258,8 +258,138 @@ Values are overwritten if the same key is used in a feature that is applied late
 To delete a value for a key, one could set the value to `null` and then have custom logic in the service to ignore values that are `null`.
 
 ### Building Strings
-_Ideas using a templating library and a dictionary coming soon._
-One could concatenate values in an array or object to build a string, but this is not recommended for strings that many configurations would want to customize because it would be difficult to maintain since other files will need to be cross-referenced.
+Use [`ConfigurableString`][ConfigurableString] to customize string values using templates and slots that are recursively replaced with values.
+For example:\
+`"{{root}}"`\
+➡️ `"{{greeting}}{{subject}}{{conclusion}}{{end}}"`\
+➡️ `"Hello {{subject}}{{conclusion}}{{end}}"`\
+➡️ `"Hello World!{{conclusion}}{{end}}"`\
+➡️ `"Hello World! I hope you have a {{adjective}} day and enjoy yourself and your time.{{end}}"`\
+➡️ `"Hello World! I hope you have a good day and enjoy yourself and your time.{{end}}"`\
+➡️ `"Hello World! I hope you have a good day and enjoy yourself and your time."`
+
+By default, `"{{"` and `"}}"` are used as delimiters for slots, but these can be customized as shown below.
+
+This implementation uses simple string operations to build the string value because these simple operations should be sufficient for most cases.
+More sophisticated implementations can use libraries like Fluid, Handlebars, Scriban, etc.
+We do not want to add such dependencies by default to this mostly minimal library.
+Perhaps extensions to this library could be published in the future.
+It's important to build strings that may be customized in a way that fosters collaboration, otherwise, it is too tempting to copy long strings and make small changes to a specific part which can lead to a lot of duplication and maintenance issues.
+Similar strings would end up in many places, resulting in bifurcation of important parts, making it difficult to update many strings when a change is needed.
+
+Example:
+```csharp
+internal sealed class MyConfiguration
+{
+    public ConfigurableString? MyString { get; set; }
+}
+```
+
+In a configuration file, `default.yaml`:
+```yaml
+options:
+    myConfig:
+        myString:
+            template: "{{root}}"
+            values:
+                root: "{{greeting}}{{subject}}{{conclusion}}{{end}}"
+                greeting: "Hello "
+                subject: "World!"
+                conclusion: " I hope you have a good day and enjoy yourself and your time."
+                end: ""
+```
+
+The resulting value for `MyString.Value` will be: `"Hello World! I hope you have a good day and enjoy yourself and your time."`.
+
+To override only the subject, `subject_everyone.yaml`:
+```yaml
+options:
+    myConfig:
+        myString:
+            values:
+                subject: "Everyone!"
+```
+
+The resulting value for `MyString.Value` with the features `["default", "subject_everyone"]` enabled will be: `"Hello Everyone! I hope you have a good day and enjoy yourself and your time."`.
+
+Delimiters can be customized. Example:
+```yaml
+options:
+    myConfig:
+        myString:
+            template: "<root>"
+            values:
+                root: "<greeting><subject><introduction><conclusion><end>"
+                introduction: " I am the app."
+                startDelimiter: "<",
+                endDelimiter: ">",
+```
+
+The resulting value for `MyString.Value` will be: `"Hello World! I am the app. I hope you have a good day and enjoy yourself and your time."`.
+
+> [!NOTE]
+> This implementation to build strings is meant to be a simple implementation to handle most cases.
+It is not meant to handle every type of edge case with every possible delimiter.
+It is not meant to handle complex cases like other libraries such as Fluid, Handlebars, Scriban, etc. might handle.
+We may change and optimization the logic to suit typical cases, but anyone relying on odd behavior such as the delimiters within the delimiters (`"{{slotA{{slotB}}}}"`) may not get consistent results in a backwards compatible way after library updates.
+In some cases we may add options to configure the replacement logic so that the old behavior can be enabled again.
+
+Another simple way to build a string could be to concatenate values from an array or dictionary, but this is not recommended for strings that many configurations would want to customize because it would be difficult to maintain since other files will need to be cross-referenced much more in order to understand the order that values might be used.
+
+#### Best Practices for Collaboratively Building Strings
+* The default template should not have literal values.
+This makes it easy to completely override the entire string by overriding the value for the key `"root"` for quick experimentation of a proof of concept.
+
+* Use a slot with a value of an empty string, `""`, to replace the slot with nothing.\
+\
+For example, if we set `"conclusion": ""`, then `"{{greeting}}{{subject}}{{conclusion}}"` will become `"Hello World!"`.
+
+* Use a slot with a value of `null` to imitate deleting a slot from the values and ensure that the slot will not be replaced.\
+\
+For example, if we set `"conclusion": null`, then `"{{greeting}}{{subject}}{{conclusion}}"` will become `"Hello World!{{conclusion}}"`.
+
+* If we want to experiment with changing a small part of a value for a slot, then **DO NOT** override the entire value and only change that one small part in your configuration because this will make maintaining such long copied strings across many files difficult, the "copypasta" problem.
+Inevitably, the same long string will be copied and modified in many places, leading to bifurcation of important parts and making it difficult to update many strings when a change to one part is needed, for example, after a successful experiment with changing another part of the string.
+It needs to be seamless to update the default value for most of the string that is not desired to be changed for every experiment.\
+\
+**Solution**: convert the specific part that needs to be modified to a slot,
+set the default value for that slot to the current value,
+and then override that new slot in another file.\
+\
+For example, to experiment with changing `"good"` to `"great"` in `conclusion: " I hope you have a good day and enjoy yourself and your time."`, change the default configuration to:\
+In `default.yaml`:
+    ```yaml
+    options:
+        myConfig:
+            myString:
+                ...
+                values:
+                    ...
+                    conclusion: " I hope you have a {{adjective}} day and enjoy yourself and your time."
+                    adjective: "good"
+    ```
+
+    Then in a new configuration, `great_feature.yaml`:
+    ```yaml
+    options:
+        myConfig:
+            myString:
+                values:
+                    adjective: "great"
+    ```
+
+    Then to use `"great"` in the string, enable the features `["default", "great_feature"]`.
+    So that "default" is applied first as a base, then "great_feature" is applied to override the adjective to "great".
+
+    Of course, now you should probably also convert `"a"` to a slot since it might need to overridden to `"an"` if the adjective starts with a vowel.
+
+* Use JSON files for managing large configurations that many may want to customize because it is easier to see the desired structure, validate the structure, and automatically format the structure.
+It is also easier to resolve merge conflicts in JSON files because the format can be validated easily.
+Using YAML files is fine for short configurations for a couple of values or configurations that are not expected to be customized often.
+
+* Unicode in YAML files: Use a later version of `YamlDotNet` in your project, for example: `<PackageReference Include="YamlDotNet" Version="16.2.1" />`.
+For example, emojis and other characters in Unicode might not work well in YAML files by default because this library only requires an old version of `YamlDotNet` in order be compatible with older projects.
+Alternatively, use JSON files for managing strings beyond ASCII characters.
 
 # Development
 ## Code Formatting
@@ -283,5 +413,6 @@ dotnet nuget push OptionsProvider/bin/Release/OptionsProvider.*.nupkg  --source 
 ```
 
 [azure-app-configuration]: https://learn.microsoft.com/en-us/azure/azure-app-configuration/
+[ConfigurableString]: ./src/OptionsProvider/OptionsProvider/String/ConfigurableString.cs
 [custom-configuration-provider]: https://learn.microsoft.com/en-us/dotnet/core/extensions/custom-configuration-provider
 [MemoryCacheEntryOptions]: https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.caching.memory.memorycacheentryoptions

@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -28,25 +28,55 @@ public sealed class OptionsProviderTests
 		Object = new MyObject { One = 11, Two = 22, Three = 3, MyEnum = MyEnum.Second, },
 	};
 
+	private static readonly IReadOnlyCollection<string> FilePaths = [
+			"configurable_strings/clear_values",
+			"configurable_strings/default",
+			"configurable_strings/override_delimiters",
+			"configurable_strings/override_template",
+			"configurable_strings/override_value",
+			"deeper_example",
+			"deeper_example2",
+			"example",
+			"subdir/example"];
+
+	[TestMethod]
+	public void Test_ConfigurableString_NotSet()
+	{
+		var myConfig = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config");
+		Assert.IsNotNull(myConfig);
+		var myString = myConfig.MyConfigurableString;
+		Assert.IsNull(myString);
+	}
+
+	[DataRow("Hello World. Today will be better than yesterday. 😉", new string[] { "configurable_strings/default" })]
+	[DataRow("{{2}}{{1}}{{more}}", new string[] { "configurable_strings/default", "configurable_strings/clear_values" })]
+	[DataRow("{{Hello }}World. Hello friends. Today will be better than yesterday. 😉😀", new string[] { "configurable_strings/default", "configurable_strings/override_delimiters" })]
+	[DataRow("World.Hello  How are you?", new string[] { "configurable_strings/default", "configurable_strings/override_template" })]
+	[DataRow("Hello World! Today will be better than yesterday. 😉", new string[] { "configurable_strings/default", "configurable_strings/override_value" })]
+	[TestMethod]
+	public void Test_Load_ConfigurableString(string? expected, string[] enabledFeatures)
+	{
+		var myConfig = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config", enabledFeatures);
+		Assert.IsNotNull(myConfig);
+		var myString = myConfig!.MyConfigurableString;
+		Assert.IsNotNull(myString);
+		Assert.AreEqual(expected, myString.Value);
+	}
+
 	[TestMethod]
 	public void Test_GetAliasMapping()
 	{
 		var aliases = OptionsProviderBuilderTests.OptionsProvider.GetAliasMapping();
 		aliases.Should().BeAssignableTo<ImmutableDictionary<string, string>>();
-		aliases.Should().BeEquivalentTo(new Dictionary<string, string>
-		{
-			["deeper"] = "deeper_example",
-			["deeper_example"] = "deeper_example",
-			["deeper_example2"] = "deeper_example2",
-			["deeper2"] = "deeper_example2",
-			["example"] = "example",
-			["sub_example"] = "subdir/example",
-			["subdir/example"] = "subdir/example",
-		});
+		var expectedAliases = FilePaths
+			.ToDictionary(f => f, f => f);
+		expectedAliases["deeper"] = "deeper_example";
+		expectedAliases["deeper2"] = "deeper_example2";
+		expectedAliases["sub_example"] = "subdir/example";
+		aliases.Should().BeEquivalentTo(expectedAliases);
 
 		aliases.Should().ContainKey("DeePeR");
 	}
-
 
 	[TestMethod]
 	public void Test_GetAllOptionsForAllFeatures()
@@ -90,7 +120,7 @@ public sealed class OptionsProviderTests
 	{
 		var featureNames = OptionsProviderBuilderTests.OptionsProvider.GetFeatureNames();
 		featureNames.Should().BeAssignableTo<IReadOnlyCollection<string>>();
-		featureNames.Should().Equal(["deeper_example", "deeper_example2", "example", "subdir/example"]);
+		featureNames.Should().Equal(FilePaths);
 	}
 
 	[TestMethod]
