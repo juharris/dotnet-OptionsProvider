@@ -259,9 +259,11 @@ To delete a value for a key, one could set the value to `null` and then have cus
 
 ### Building Strings
 Use [`ConfigurableString`][ConfigurableString] to customize string values using templates and slots.
-This implementation uses simple string operations to build the value because it should be sufficient work for most cases.
+This implementation uses simple string operations to build the string value because these simple operations be sufficient for most cases.
 More sophisticated implementations can use libraries like Fluid, Handlebars, Scriban, etc.
 We do not want to add such dependencies by default to this mostly simple project.
+It's important to build strings that may be customized in a ways that fosters collaboration, otherwise, it is too tempting to copy long strings and make small changes to a specific part which can lead to a lot of duplication and maintenance issues.
+Similar strings would end up in many places, resulting it bifurcation of important parts, making it difficult to update many strings when a change is needed.
 
 Example:
 ```csharp
@@ -285,7 +287,7 @@ options:
                 end: ""
 ```
 
-The resulting value for `MyString.Value` with the feature enabled will be `"Hello World!"`.
+The resulting value for `MyString.Value` with the feature enabled will be `"Hello World! I hope you have a good day and enjoy yourself and your time."`.
 
 To override only the subject:
 ```yaml
@@ -296,16 +298,27 @@ options:
                 subject: "Everyone!"
 ```
 
-The resulting value for `MyString.Value` with the feature enabled will be `"Hello Everyone!"`.
+The resulting value for `MyString.Value` with the feature enabled will be `"Hello Everyone! I hope you have a good day and enjoy yourself and your time."`.
 
 Another simple way to build a string could be to concatenate values from an array or dictionary, but this is not recommended for strings that many configurations would want to customize because it would be difficult to maintain since other files will need to be cross-referenced much more in order to understand the order that values might be used.
 
 #### Best Practices for Collaborating on Strings
-* The default template should not have literal values that are not slots.
-This makes it easy to completely override the entire string by overriding the root slot for quick experimentation of a proof of concept.
-* If you want to experiment with changing part of a value, then **DO NOT** override the entire value because TODO REASON.
-Instead, change the specific part that you want to change to a slot, set the default value for that slot to the current value, and then override that slot.
-For example, to experiment with changing `"good"` to `"great"` in `conclusion: " I hope you have a good day and enjoy yourself and your time."`, change the default configuration to:
+* The default template should not have literal values.
+This makes it easy to completely override the entire string by overriding the value for the key `"root"` for quick experimentation of a proof of concept.
+* Use a slot with a value of an empty string, `""` to replacing the slot with nothing.\
+\
+For example, if we set `"conclusion": ""`, then `"{{greeting}}{{subject}}{{conclusion}}"` will become `"Hello World!"`.
+* Use a slot with a value of `null` to imitate deleting a slot from the values and ensure that the slot will not be replaced.\
+\
+For example, if we set `"conclusion": null`, then `"{{greeting}}{{subject}}{{conclusion}}"` will become `"Hello World!{{conclusion}}"`.
+* If we want to experiment with changing a small part of a value for a slot, then **DO NOT** override the entire value because this will make maintaining such long copied strings across many files difficult.
+Inevitably, the same long string will be copied and modified in many places, leading to bifurcation of important parts and making it difficult to update many strings when a change to some other part is needed, for example, after a successful experiment with changing another part of the string.
+Instead, convert the specific part that needs to be modified to a slot,
+set the default value for that slot to the current value,
+and then override that slot.\
+\
+For example, to experiment with changing `"good"` to `"great"` in `conclusion: " I hope you have a good day and enjoy yourself and your time."`, change the default configuration to:\
+In `default.yaml`:
     ```yaml
     options:
         myConfig:
@@ -316,7 +329,7 @@ For example, to experiment with changing `"good"` to `"great"` in `conclusion: "
                     adjective: "good"
     ```
 
-    Then in a new configuration:
+    Then in a new configuration, `great_feature.yaml`:
     ```yaml
     options:
         myConfig:
@@ -325,7 +338,10 @@ For example, to experiment with changing `"good"` to `"great"` in `conclusion: "
                     adjective: "great"
     ```
 
-Of course, now you should probably also add a slot for `"a"` since it might need to be `"an"` if the adjective starts with a vowel.
+    Then to use great, enable the features `["default", "great_feature"]`.
+    So that "default" is applied first as a base, then "great_feature" is applied to override the adjective to "great".
+
+    Of course, now you should probably also convert `"a"` to a slot since it might need to overridden to `"an"` if the adjective starts with a vowel.
 
 # Development
 ## Code Formatting

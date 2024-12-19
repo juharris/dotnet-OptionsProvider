@@ -11,6 +11,8 @@ public sealed class ConfigurableStringTests
 	[DataRow("Hello World", "{{1}} {{2}}")]
 	[DataRow("Hello World {{3}}", "{{1}} {{2}} {{3}}")]
 	[DataRow("{{3}} Hello World", "{{3}} {{1}} {{2}}")]
+	[DataRow("{{no mapping}} World", "{{no mapping}} {{2}}")]
+	[DataRow("{{null}} World", "{{null}} {{2}}")]
 	[DataRow("Hello World", "{{1 and 2}}")]
 	[DataRow("Hello World Hello World", "{{1 and 2}} {{1 and 2}}")]
 	[DataRow("|Hello World| {{1}", "|{{1 and 2}}| {{1}")]
@@ -26,7 +28,7 @@ public sealed class ConfigurableStringTests
 		var configurableString = new ConfigurableString
 		{
 			Template = template,
-			Values = new Dictionary<string, string>
+			Values = new Dictionary<string, string?>
 			{
 				["1"] = "Hello",
 				["2"] = "World",
@@ -40,6 +42,7 @@ public sealed class ConfigurableStringTests
 				["empty"] = string.Empty,
 				[" "] = " ",
 				["space"] = " ",
+				["null"] = null,
 				["first"] = "This is a {{noun }}that someone might {{verb}} in a {{empty}}typical{{space}}example",
 				["rest"] = " for{{ }}displaying in their appli{{}}cation or logging",
 				["."] = ".",
@@ -58,7 +61,7 @@ public sealed class ConfigurableStringTests
 		var configurableString = new ConfigurableString
 		{
 			Template = template,
-			Values = new Dictionary<string, string>
+			Values = new Dictionary<string, string?>
 			{
 				["1"] = "Hello",
 				["2"] = "World",
@@ -77,7 +80,7 @@ public sealed class ConfigurableStringTests
 		var configurableString = new ConfigurableString
 		{
 			Template = "{{1}} {{2}}",
-			Values = new Dictionary<string, string>
+			Values = new Dictionary<string, string?>
 			{
 				["1"] = "{{2}}",
 				["2"] = "{{1}}",
@@ -85,5 +88,16 @@ public sealed class ConfigurableStringTests
 		};
 		var exception = Assert.ThrowsException<InvalidOperationException>(() => configurableString.Value);
 		Assert.AreEqual("The replacement loop count exceeded the maximum allowed iterations (10000). There was likely a recursive loop using the template and values.", exception.Message);
+	}
+
+	[TestMethod]
+	public void Test_ConfigurableString_NullValues()
+	{
+		var configurableString = new ConfigurableString
+		{
+			Template = "{{1}} {{2}}",
+			Values = null,
+		};
+		Assert.AreEqual("{{1}} {{2}}", configurableString.Value);
 	}
 }

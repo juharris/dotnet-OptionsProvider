@@ -22,7 +22,12 @@ trim_trailing_whitespace = true
 
 csharp_style_namespace_declarations = file_scoped:error
 
+# Nullables
+# CS8602: Dereference of a possibly null reference.
 dotnet_diagnostic.CS8602.severity = error
+
+# CS8625: Cannot convert null literal to non-nullable reference type.
+dotnet_diagnostic.CS8625.severity = error
 
 # IDE0003: Remove qualification
 # Use `this` for members:

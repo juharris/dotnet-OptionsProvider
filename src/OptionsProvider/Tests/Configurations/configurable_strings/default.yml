@@ -8,5 +8,5 @@ options:
             template: "{{1}}{{2}}{{remainder}}"
             values:
                 "1": "Hello "
-                "2": "World"
-                remainder: ". Today will be better than yesterday."
+                "2": "World."
+                remainder: " Today will be better than yesterday."

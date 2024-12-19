@@ -38,9 +38,19 @@ public sealed class OptionsProviderTests
 
 		myConfig = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["configurable_strings/default"]);
 		myString = myConfig!.MyConfigurableString;
-		Assert.IsNotNull(myString);
-		Assert.AreEqual("Hello World. Today will be better than yesterday.", myString.Value);
+		Assert.AreEqual("Hello World. Today will be better than yesterday.", myString!.Value);
 
+		myConfig = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["configurable_strings/default", "configurable_strings/override_template",]);
+		myString = myConfig!.MyConfigurableString;
+		Assert.AreEqual("World.Hello  How are you?", myString!.Value);
+
+		myConfig = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["configurable_strings/default", "configurable_strings/override_value",]);
+		myString = myConfig!.MyConfigurableString;
+		Assert.AreEqual("Hello World! Today will be better than yesterday.", myString!.Value);
+
+		myConfig = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["configurable_strings/default", "configurable_strings/clear_values",]);
+		myString = myConfig!.MyConfigurableString;
+		Assert.AreEqual("{{2}}{{1}}{{more}}", myString!.Value);
 	}
 
 	[TestMethod]
@@ -50,6 +60,7 @@ public sealed class OptionsProviderTests
 		aliases.Should().BeAssignableTo<ImmutableDictionary<string, string>>();
 		aliases.Should().BeEquivalentTo(new Dictionary<string, string>
 		{
+			["configurable_strings/clear_values"] = "configurable_strings/clear_values",
 			["configurable_strings/default"] = "configurable_strings/default",
 			["configurable_strings/override_template"] = "configurable_strings/override_template",
 			["configurable_strings/override_value"] = "configurable_strings/override_value",
@@ -64,7 +75,6 @@ public sealed class OptionsProviderTests
 
 		aliases.Should().ContainKey("DeePeR");
 	}
-
 
 	[TestMethod]
 	public void Test_GetAllOptionsForAllFeatures()
@@ -109,6 +119,7 @@ public sealed class OptionsProviderTests
 		var featureNames = OptionsProviderBuilderTests.OptionsProvider.GetFeatureNames();
 		featureNames.Should().BeAssignableTo<IReadOnlyCollection<string>>();
 		featureNames.Should().Equal([
+			"configurable_strings/clear_values",
 			"configurable_strings/default",
 			"configurable_strings/override_template",
 			"configurable_strings/override_value",

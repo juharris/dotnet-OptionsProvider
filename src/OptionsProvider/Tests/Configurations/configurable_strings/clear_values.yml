@@ -1,0 +1,13 @@
+metadata:
+    # This is an example that is also used in tests.
+    isPersistent: true
+    owners: Justin@site.com
+options:
+    config:
+        myConfigurableString:
+            template: "{{2}}{{1}}{{more}}"
+            # Clear values that might have been set and do not replace these slots.
+            values:
+                "1": null
+                "2": null
+                more: null
