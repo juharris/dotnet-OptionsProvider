@@ -259,7 +259,7 @@ To delete a value for a key, one could set the value to `null` and then have cus
 
 ### Building Strings
 Use [`ConfigurableString`][ConfigurableString] to customize string values using templates and slots.
-This implementation uses simple string operations to build the value because this should work for most cases.
+This implementation uses simple string operations to build the value because it should be sufficient work for most cases.
 More sophisticated implementations can use libraries like Fluid, Handlebars, Scriban, etc.
 We do not want to add such dependencies by default to this mostly simple project.
 
@@ -271,6 +271,7 @@ internal sealed class MyConfiguration
 }
 ```
 
+In a configuration file:
 ```yaml
 options:
     myConfig:

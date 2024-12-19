@@ -9,4 +9,4 @@ options:
             values:
                 "1": "Hello "
                 "2": "World"
-                remainder: " Today will be better than yesterday."
+                remainder: ". Today will be better than yesterday."

@@ -29,12 +29,30 @@ public sealed class OptionsProviderTests
 	};
 
 	[TestMethod]
+	public void Test_ConfigurableString()
+	{
+		var myConfig = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config");
+		Assert.IsNotNull(myConfig);
+		var myString = myConfig.MyConfigurableString;
+		Assert.IsNull(myString);
+
+		myConfig = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config", ["configurable_strings/default"]);
+		myString = myConfig!.MyConfigurableString;
+		Assert.IsNotNull(myString);
+		Assert.AreEqual("Hello World. Today will be better than yesterday.", myString.Value);
+
+	}
+
+	[TestMethod]
 	public void Test_GetAliasMapping()
 	{
 		var aliases = OptionsProviderBuilderTests.OptionsProvider.GetAliasMapping();
 		aliases.Should().BeAssignableTo<ImmutableDictionary<string, string>>();
 		aliases.Should().BeEquivalentTo(new Dictionary<string, string>
 		{
+			["configurable_strings/default"] = "configurable_strings/default",
+			["configurable_strings/override_template"] = "configurable_strings/override_template",
+			["configurable_strings/override_value"] = "configurable_strings/override_value",
 			["deeper"] = "deeper_example",
 			["deeper_example"] = "deeper_example",
 			["deeper_example2"] = "deeper_example2",
@@ -90,7 +108,14 @@ public sealed class OptionsProviderTests
 	{
 		var featureNames = OptionsProviderBuilderTests.OptionsProvider.GetFeatureNames();
 		featureNames.Should().BeAssignableTo<IReadOnlyCollection<string>>();
-		featureNames.Should().Equal(["deeper_example", "deeper_example2", "example", "subdir/example"]);
+		featureNames.Should().Equal([
+			"configurable_strings/default",
+			"configurable_strings/override_template",
+			"configurable_strings/override_value",
+			"deeper_example",
+			"deeper_example2",
+			"example",
+			"subdir/example"]);
 	}
 
 	[TestMethod]
