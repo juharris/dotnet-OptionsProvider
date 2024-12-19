@@ -5,6 +5,64 @@ namespace OptionsProvider.Tests.String;
 [TestClass]
 public sealed class ConfigurableStringTests
 {
+
+	[DataRow("Hello World", "|1| |2|")]
+	[DataRow("Hello World", "|1 and 2|")]
+	[DataRow("Hello2|", "|1|2|")]
+	[TestMethod]
+	public void Test_ConfigurableString_CustomDelimiters(string expected, string template)
+	{
+		var configurableString = new ConfigurableString
+		{
+			Template = template,
+			Values = new Dictionary<string, string?>
+			{
+				["1"] = "Hello",
+				["2"] = "World",
+				["1 and 2"] = "|1| |2|",
+			},
+			StartDelimiter = "|",
+			EndDelimiter = "|",
+		};
+
+		Assert.AreEqual(expected, configurableString.Value);
+	}
+
+	[TestMethod]
+	public void Test_ConfigurableString_FromString()
+	{
+		const string expected = "wtv {{slot}} hey";
+		ConfigurableString configurableString = expected;
+		Assert.AreEqual(expected, configurableString.Value);
+	}
+
+	[TestMethod]
+	public void Test_ConfigurableString_NullValues()
+	{
+		var configurableString = new ConfigurableString
+		{
+			Template = "{{1}} {{2}}",
+			Values = null,
+		};
+		Assert.AreEqual("{{1}} {{2}}", configurableString.Value);
+	}
+
+	[TestMethod]
+	public void Test_ConfigurableString_TooManyIterations()
+	{
+		var configurableString = new ConfigurableString
+		{
+			Template = "{{1}} {{2}}",
+			Values = new Dictionary<string, string?>
+			{
+				["1"] = "{{2}}",
+				["2"] = "{{1}}",
+			},
+		};
+		var exception = Assert.ThrowsException<InvalidOperationException>(() => configurableString.Value);
+		Assert.AreEqual("The replacement loop count exceeded the maximum allowed iterations (10000). There was likely a recursive loop using the template and values.", exception.Message);
+	}
+
 	[DataRow(null, null)]
 	[DataRow("", "")]
 	[DataRow("Hello World", "Hello World")]
@@ -50,54 +108,5 @@ public sealed class ConfigurableStringTests
 		};
 
 		Assert.AreEqual(expected, configurableString.Value);
-	}
-
-	[DataRow("Hello World", "|1| |2|")]
-	[DataRow("Hello World", "|1 and 2|")]
-	[DataRow("Hello2|", "|1|2|")]
-	[TestMethod]
-	public void Test_ConfigurableString_CustomDelimiters(string expected, string template)
-	{
-		var configurableString = new ConfigurableString
-		{
-			Template = template,
-			Values = new Dictionary<string, string?>
-			{
-				["1"] = "Hello",
-				["2"] = "World",
-				["1 and 2"] = "|1| |2|",
-			},
-			StartDelimiter = "|",
-			EndDelimiter = "|",
-		};
-
-		Assert.AreEqual(expected, configurableString.Value);
-	}
-
-	[TestMethod]
-	public void Test_ConfigurableString_TooManyIterations()
-	{
-		var configurableString = new ConfigurableString
-		{
-			Template = "{{1}} {{2}}",
-			Values = new Dictionary<string, string?>
-			{
-				["1"] = "{{2}}",
-				["2"] = "{{1}}",
-			},
-		};
-		var exception = Assert.ThrowsException<InvalidOperationException>(() => configurableString.Value);
-		Assert.AreEqual("The replacement loop count exceeded the maximum allowed iterations (10000). There was likely a recursive loop using the template and values.", exception.Message);
-	}
-
-	[TestMethod]
-	public void Test_ConfigurableString_NullValues()
-	{
-		var configurableString = new ConfigurableString
-		{
-			Template = "{{1}} {{2}}",
-			Values = null,
-		};
-		Assert.AreEqual("{{1}} {{2}}", configurableString.Value);
 	}
 }

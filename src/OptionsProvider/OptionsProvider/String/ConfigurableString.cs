@@ -124,4 +124,19 @@ public sealed class ConfigurableString
 
 		return result;
 	}
+
+	/// <summary>
+	/// Implicitly converts a string to a <see cref="ConfigurableString"/>.
+	/// </summary>
+	/// <param name="value">
+	/// The value to return for <see cref="Value"/>.
+	/// </param>
+	public static implicit operator ConfigurableString(string value)
+	{
+		return new ConfigurableString
+		{
+			Template = value,
+			Values = null,
+		};
+	}
 }
