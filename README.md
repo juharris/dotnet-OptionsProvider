@@ -261,7 +261,8 @@ To delete a value for a key, one could set the value to `null` and then have cus
 Use [`ConfigurableString`][ConfigurableString] to customize string values using templates and slots.
 This implementation uses simple string operations to build the string value because these simple operations be sufficient for most cases.
 More sophisticated implementations can use libraries like Fluid, Handlebars, Scriban, etc.
-We do not want to add such dependencies by default to this mostly simple project.
+We do not want to add such dependencies by default to this mostly minimal library.
+Perhaps extensions to this library could be published in the future.
 It's important to build strings that may be customized in a ways that fosters collaboration, otherwise, it is too tempting to copy long strings and make small changes to a specific part which can lead to a lot of duplication and maintenance issues.
 Similar strings would end up in many places, resulting it bifurcation of important parts, making it difficult to update many strings when a change is needed.
 
