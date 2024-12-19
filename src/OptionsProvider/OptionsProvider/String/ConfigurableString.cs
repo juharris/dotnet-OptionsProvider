@@ -1,4 +1,6 @@
-﻿namespace OptionsProvider.String;
+﻿using System.Diagnostics;
+
+namespace OptionsProvider.String;
 
 /// <summary>
 /// Helps configure a long string that many features may need to customize.
@@ -13,6 +15,7 @@
 /// We may change and optimization the logic to suit typical cases, but anyone relying on odd behavior such as the delimiters within the delimiters (<tt>&quot;{{slotA{{slotB}}}</tt>}&quot;) may not get consistent results in a backwards compatible way after library updates.
 /// In some cases we may add options to configure the replacement logic so that the old behavior can be enabled again.
 /// </remarks>
+[DebuggerDisplay("{Value,nq}")]
 public sealed class ConfigurableString
 {
 	/// <summary>
