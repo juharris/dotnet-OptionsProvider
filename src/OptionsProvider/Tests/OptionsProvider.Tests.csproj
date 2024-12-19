@@ -17,6 +17,8 @@
 		<PackageReference Include="MSTest.TestAdapter" Version="3.1.1" />
 		<PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
+        <!-- Use a later version than the default to ensure that emojis work in YAML files. -->
+        <PackageReference Include="YamlDotNet" Version="16.2.1" />
 	</ItemGroup>
 
 	<ItemGroup>

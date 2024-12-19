@@ -48,11 +48,11 @@ public sealed class OptionsProviderTests
 		Assert.IsNull(myString);
 	}
 
-	[DataRow("Hello World. Today will be better than yesterday.", new string[] { "configurable_strings/default" })]
+	[DataRow("Hello World. Today will be better than yesterday. 😉", new string[] { "configurable_strings/default" })]
 	[DataRow("{{2}}{{1}}{{more}}", new string[] { "configurable_strings/default", "configurable_strings/clear_values" })]
-	[DataRow("{{Hello }}World. Hello friends. Today will be better than yesterday.😀", new string[] { "configurable_strings/default", "configurable_strings/override_delimiters" })]
+	[DataRow("{{Hello }}World. Hello friends. Today will be better than yesterday. 😉😀", new string[] { "configurable_strings/default", "configurable_strings/override_delimiters" })]
 	[DataRow("World.Hello  How are you?", new string[] { "configurable_strings/default", "configurable_strings/override_template" })]
-	[DataRow("Hello World! Today will be better than yesterday.", new string[] { "configurable_strings/default", "configurable_strings/override_value" })]
+	[DataRow("Hello World! Today will be better than yesterday. 😉", new string[] { "configurable_strings/default", "configurable_strings/override_value" })]
 	[TestMethod]
 	public void Test_Load_ConfigurableString(string? expected, string[] enabledFeatures)
 	{
