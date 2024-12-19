@@ -274,7 +274,7 @@ internal sealed class MyConfiguration
 }
 ```
 
-In a configuration file:
+In a configuration file, `default.yaml`:
 ```yaml
 options:
     myConfig:
@@ -288,9 +288,9 @@ options:
                 end: ""
 ```
 
-The resulting value for `MyString.Value` with the feature enabled will be `"Hello World! I hope you have a good day and enjoy yourself and your time."`.
+The resulting value for `MyString.Value` will be: `"Hello World! I hope you have a good day and enjoy yourself and your time."`.
 
-To override only the subject:
+To override only the subject in `subject_everyone.yaml`:
 ```yaml
 options:
     myConfig:
@@ -299,24 +299,26 @@ options:
                 subject: "Everyone!"
 ```
 
-The resulting value for `MyString.Value` with the feature enabled will be `"Hello Everyone! I hope you have a good day and enjoy yourself and your time."`.
+The resulting value for `MyString.Value` with the features `["default", "subject_everyone"]` enabled will be: `"Hello Everyone! I hope you have a good day and enjoy yourself and your time."`.
 
 Another simple way to build a string could be to concatenate values from an array or dictionary, but this is not recommended for strings that many configurations would want to customize because it would be difficult to maintain since other files will need to be cross-referenced much more in order to understand the order that values might be used.
 
-#### Best Practices for Collaborating on Strings
+#### Best Practices for Collaboratively Building Strings
 * The default template should not have literal values.
 This makes it easy to completely override the entire string by overriding the value for the key `"root"` for quick experimentation of a proof of concept.
-* Use a slot with a value of an empty string, `""` to replacing the slot with nothing.\
+* Use a slot with a value of an empty string, `""`, to replace the slot with nothing.\
 \
 For example, if we set `"conclusion": ""`, then `"{{greeting}}{{subject}}{{conclusion}}"` will become `"Hello World!"`.
 * Use a slot with a value of `null` to imitate deleting a slot from the values and ensure that the slot will not be replaced.\
 \
 For example, if we set `"conclusion": null`, then `"{{greeting}}{{subject}}{{conclusion}}"` will become `"Hello World!{{conclusion}}"`.
-* If we want to experiment with changing a small part of a value for a slot, then **DO NOT** override the entire value because this will make maintaining such long copied strings across many files difficult.
-Inevitably, the same long string will be copied and modified in many places, leading to bifurcation of important parts and making it difficult to update many strings when a change to some other part is needed, for example, after a successful experiment with changing another part of the string.
-Instead, convert the specific part that needs to be modified to a slot,
+* If we want to experiment with changing a small part of a value for a slot, then **DO NOT** override the entire value and only change that one small part because this will make maintaining such long copied strings across many files difficult, the "copypasta" problem.
+Inevitably, the same long string will be copied and modified in many places, leading to bifurcation of important parts and making it difficult to update many strings when a change to one part is needed, for example, after a successful experiment with changing another part of the string.
+It needs to be seamless to update the default value for most of the string that is not desired to be changed for every experiment.\
+\
+**Solution**: convert the specific part that needs to be modified to a slot,
 set the default value for that slot to the current value,
-and then override that slot.\
+and then override that new slot in another file.\
 \
 For example, to experiment with changing `"good"` to `"great"` in `conclusion: " I hope you have a good day and enjoy yourself and your time."`, change the default configuration to:\
 In `default.yaml`:
@@ -326,6 +328,7 @@ In `default.yaml`:
             myString:
                 ...
                 values:
+                    ...
                     conclusion: " I hope you have a {{adjective}} day and enjoy yourself and your time."
                     adjective: "good"
     ```
@@ -339,7 +342,7 @@ In `default.yaml`:
                     adjective: "great"
     ```
 
-    Then to use great, enable the features `["default", "great_feature"]`.
+    Then to use `"great"` in the string, enable the features `["default", "great_feature"]`.
     So that "default" is applied first as a base, then "great_feature" is applied to override the adjective to "great".
 
     Of course, now you should probably also convert `"a"` to a slot since it might need to overridden to `"an"` if the adjective starts with a vowel.
