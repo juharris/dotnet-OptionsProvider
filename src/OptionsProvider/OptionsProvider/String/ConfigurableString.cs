@@ -9,6 +9,9 @@
 /// This implementation uses simple string operations to build the value because it should be sufficient for most cases.
 /// More sophisticated implementations can use libraries like Fluid, Handlebars, Scriban, etc.
 /// We do not want to add such dependencies by default to this mostly simple project.
+/// This implementation is not meant to handle every type of edge case with every possible delimiter.
+/// We may change and optimization the logic to suit typical cases, but anyone relying on odd behavior such as the delimiters within the delimiters (<tt>&quot;{{slotA{{slotB}}}</tt>}&quot;) may not get consistent results in a backwards compatible way after library updates.
+/// In some cases we may add options to configure the replacement logic so that the old behavior can be enabled again.
 /// </remarks>
 public sealed class ConfigurableString
 {
