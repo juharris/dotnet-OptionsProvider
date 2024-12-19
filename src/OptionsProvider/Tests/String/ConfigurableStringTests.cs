@@ -23,7 +23,7 @@ public sealed class ConfigurableStringTests
 	[DataRow("One World", "{{1{{2}}}}")]
 	[DataRow("This is a long string that someone might build in a typical example for displaying in their application or logging.", "{{empty}}{{first}}{{}}{{rest}}{{}}{{.}}{{}}")]
 	[TestMethod]
-	public void Tests_ConfigurableString(string expected, string template)
+	public void Test_ConfigurableString(string expected, string template)
 	{
 		var configurableString = new ConfigurableString
 		{
@@ -56,7 +56,7 @@ public sealed class ConfigurableStringTests
 	[DataRow("Hello World", "|1 and 2|")]
 	[DataRow("Hello2|", "|1|2|")]
 	[TestMethod]
-	public void Tests_ConfigurableString_CustomDelimiters(string expected, string template)
+	public void Test_ConfigurableString_CustomDelimiters(string expected, string template)
 	{
 		var configurableString = new ConfigurableString
 		{
