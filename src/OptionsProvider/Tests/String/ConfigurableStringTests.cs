@@ -5,7 +5,6 @@ namespace OptionsProvider.Tests.String;
 [TestClass]
 public sealed class ConfigurableStringTests
 {
-
 	[DataRow("Hello World", "|1| |2|")]
 	[DataRow("Hello World", "|1 and 2|")]
 	[DataRow("Hello2|", "|1|2|")]
@@ -77,7 +76,9 @@ public sealed class ConfigurableStringTests
 	[DataRow("Hello}", "{{1}}}")]
 	[DataRow("{Hello}", "{{{1}}}")]
 	[DataRow("{{BRACES}}", "{{braces}}")]
-	[DataRow("{{wtvWorld}}", "{{wtv{{2}}}}")]
+	[DataRow("FINALLY", "{{wtv{{2}}}}")]
+	[DataRow("FINALLY", "{{emp{{empty}}ty}}{{wtv{{{{emp{{em{{empty}}pty}}ty}}2{{empty}}}}{{emp{{empty}}ty}}}}{{empty}}{{empty}}")]
+	[DataRow("raw FINALLY", "raw {{emp{{empty}}ty}}{{wtv{{{{emp{{em{{empty}}pty}}ty}}2{{empty}}}}{{emp{{empty}}ty}}}}{{empty}}{{empty}}")]
 	[DataRow("One World", "{{1{{2}}}}")]
 	[DataRow("This is a long string that someone might build in a typical example for displaying in their application or logging.", "{{empty}}{{first}}{{}}{{rest}}{{}}{{.}}{{}}")]
 	[TestMethod]
@@ -92,6 +93,7 @@ public sealed class ConfigurableStringTests
 				["2"] = "World",
 				["1World"] = "One World",
 				["1 and 2"] = "{{1}} {{2}}",
+				["wtvWorld"] = "FINALLY",
 				["braces"] = "{{BRACES}}",
 				["1{{2}}"] = "{{1{{2}}}}",
 				["verb"] = "build",

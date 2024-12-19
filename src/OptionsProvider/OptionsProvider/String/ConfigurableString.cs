@@ -82,11 +82,12 @@ public sealed class ConfigurableString
 
 		string result = this.Template;
 
-		var slotStartIndex = 0;
+		var searchStartIndex = 0;
+		var earliestPossibleSearchIndex = -1;
 		var loopIndex = 0;
 		for (; loopIndex < maxLoopCount; ++loopIndex)
 		{
-			slotStartIndex = result.IndexOf(this.StartDelimiter, slotStartIndex, StringComparison.Ordinal);
+			var slotStartIndex = result.IndexOf(this.StartDelimiter, searchStartIndex, StringComparison.Ordinal);
 			if (slotStartIndex == -1)
 			{
 				break;
@@ -107,13 +108,27 @@ public sealed class ConfigurableString
 				// Only replace it if the value is found, otherwise assume that the slot is part of the string.
 				result = $"{result.AsSpan(0, slotStartIndex)}{value}{result.AsSpan(slotEndIndex + this.EndDelimiter.Length)}";
 
-				// We need to restart from the beginning because the string has changed so we need to check for the first instance of a start delimiter since we might have been building a key.
-				slotStartIndex = 0;
+				// We need to restart from an early place because the string has changed so we need to check for the first instance of a start delimiter since we might have been building a key.
+				// Using a stack might be more efficient, but use more memory, this is simpler and should be sufficient for most cases.
+				if (earliestPossibleSearchIndex == -1)
+				{
+					earliestPossibleSearchIndex = searchStartIndex = slotStartIndex;
+				}
+				else
+				{
+					searchStartIndex = earliestPossibleSearchIndex;
+					// Reset the earliest possible search index later after searching for the next slot.
+					earliestPossibleSearchIndex = -1;
+				}
 			}
 			else
 			{
-				// The value at this start index was not found, so we will continue searching from the next character since we may have consecutive or overlapping start delimiters.
-				slotStartIndex += 1;
+				// The value at this start index was not found, so we will continue searching from the next character since we may have consecutive or overlapping start delimiters such as "{{{key}}".
+				searchStartIndex += 1;
+				if (earliestPossibleSearchIndex == -1)
+				{
+					earliestPossibleSearchIndex = slotStartIndex;
+				}
 			}
 		}
 
