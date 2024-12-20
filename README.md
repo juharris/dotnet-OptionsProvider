@@ -160,7 +160,7 @@ If `enabledFeatures` is `["A", "B"]`, then `MyConfiguration` will be built in th
 2. Apply the values from `Configurations/feature_A.json`.
 3. Apply the values from `Configurations/feature_B/initial.yaml`.
 
-## Using A Builder
+## Using a Builder
 Using `IOptionsProviderBuilder` directly can be helpful if you are working in a large service and do not want to use `IOptionsProvider` as a global or shared singleton for all options.
 
 Configurations can be loaded when setting up your DI container or in a constructor.
@@ -311,6 +311,24 @@ options:
 ```
 
 The resulting value for `MyString.Value` with the features `["default", "subject_everyone"]` enabled will be: `"Hello Everyone! I hope you have a good day and enjoy yourself and your time."`.
+
+To quickly experiment with a full raw string, the most robust way is set the value for the slot `"{{root}}"` to the raw string in a new configuration file, `raw_string.yaml` (note that this is not very collaborative as explained below in the Best Practices section):
+```yaml
+options:
+    myConfig:
+        myString:
+            values:
+                root: "Hello World! I hope you have a good day and enjoy yourself and your time."
+```
+
+For convenience, another way to quickly experiment with a new value for `myString` is to override its value in a new configuration file, `raw_string.yaml` (note that this is not very collaborative as explained below in the Best Practices section):
+```yaml
+options:
+    myConfig:
+        myString: "{{greeting}} This is a raw string and no replacements will be done."
+```
+
+The resulting value for `MyString.Value` with the features `["default", "raw_string"]` enabled will be: `"{{greeting}} This is a raw string and no replacements will be done."`.
 
 Delimiters can be customized. Example:
 ```yaml

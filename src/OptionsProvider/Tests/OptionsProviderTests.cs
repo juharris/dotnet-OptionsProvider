@@ -31,13 +31,15 @@ public sealed class OptionsProviderTests
 	private static readonly IReadOnlyCollection<string> FilePaths = [
 			"configurable_strings/clear_values",
 			"configurable_strings/default",
+			"configurable_strings/only_string",
 			"configurable_strings/override_delimiters",
 			"configurable_strings/override_template",
 			"configurable_strings/override_value",
 			"deeper_example",
 			"deeper_example2",
 			"example",
-			"subdir/example"];
+			"subdir/example",
+	];
 
 	[TestMethod]
 	public void Test_ConfigurableString_NotSet()
@@ -51,6 +53,8 @@ public sealed class OptionsProviderTests
 	[DataRow("Hello World. Today will be better than yesterday. 😉", new string[] { "configurable_strings/default" })]
 	[DataRow("{{2}}{{1}}{{more}}", new string[] { "configurable_strings/default", "configurable_strings/clear_values" })]
 	[DataRow("{{Hello }}World. Hello friends. Today will be better than yesterday. 😉😀", new string[] { "configurable_strings/default", "configurable_strings/override_delimiters" })]
+	[DataRow("This will not get replaced {{2}} {{1}} {{more}} END.", new string[] { "configurable_strings/only_string" })]
+	[DataRow("This will not get replaced {{2}} {{1}} {{more}} END.", new string[] { "configurable_strings/default", "configurable_strings/only_string" })]
 	[DataRow("World.Hello  How are you?", new string[] { "configurable_strings/default", "configurable_strings/override_template" })]
 	[DataRow("Hello World! Today will be better than yesterday. 😉", new string[] { "configurable_strings/default", "configurable_strings/override_value" })]
 	[TestMethod]
@@ -59,7 +63,7 @@ public sealed class OptionsProviderTests
 		var myConfig = OptionsProviderBuilderTests.OptionsProvider.GetOptions<MyConfiguration>("config", enabledFeatures);
 		Assert.IsNotNull(myConfig);
 		var myString = myConfig!.MyConfigurableString;
-		Assert.IsNotNull(myString);
+		Assert.IsNotNull(myString, $"`{nameof(myConfig.MyConfigurableString)}` was not set.");
 		Assert.AreEqual(expected, myString.Value);
 	}
 
