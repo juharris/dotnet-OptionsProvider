@@ -145,14 +145,23 @@ public sealed class ConfigurableString
 	/// <summary>
 	/// Implicitly converts a string to a <see cref="ConfigurableString"/>.
 	/// </summary>
-	/// <param name="value">
+	/// <param name="rawValue">
 	/// The value to return for <see cref="Value"/>.
 	/// </param>
-	public static implicit operator ConfigurableString(string value)
+	public static implicit operator ConfigurableString(string? rawValue)
 	{
 		return new ConfigurableString
 		{
-			Template = value,
+			Template = rawValue,
 		};
+	}
+
+	/// <summary>
+	/// Implicitly converts a <see cref="ConfigurableString"/> to a string.
+	/// </summary>
+	/// <param name="configurableString"></param>
+	public static implicit operator string?(ConfigurableString? configurableString)
+	{
+		return configurableString?.Value;
 	}
 }

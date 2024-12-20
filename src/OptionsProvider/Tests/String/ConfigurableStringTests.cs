@@ -33,6 +33,10 @@ public sealed class ConfigurableStringTests
 		const string expected = "wtv {{slot}} hey";
 		ConfigurableString configurableString = expected;
 		Assert.AreEqual(expected, configurableString.Value);
+
+		const string? nullString = null;
+		ConfigurableString configurableString2 = nullString;
+		Assert.IsNull(configurableString2.Value);
 	}
 
 	[TestMethod]
@@ -60,6 +64,22 @@ public sealed class ConfigurableStringTests
 		};
 		var exception = Assert.ThrowsException<InvalidOperationException>(() => configurableString.Value);
 		Assert.AreEqual("The replacement loop count exceeded the maximum allowed iterations (10000). There was likely a recursive loop using the template and values.", exception.Message);
+	}
+
+	[TestMethod]
+	public void Test_ConfigurableString_Implicit_String()
+	{
+		const string expected = "wtv {{slot}} hey";
+		string? actual = new ConfigurableString
+		{
+			Template = expected,
+		};
+
+		Assert.AreEqual(expected, actual);
+
+		ConfigurableString? nullConfigurableString = null;
+		string? actual2 = nullConfigurableString;
+		Assert.IsNull(actual2);
 	}
 
 	[DataRow(null, null)]
