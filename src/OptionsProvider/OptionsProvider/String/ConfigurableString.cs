@@ -159,7 +159,9 @@ public sealed class ConfigurableString
 	/// <summary>
 	/// Implicitly converts a <see cref="ConfigurableString"/> to a string.
 	/// </summary>
-	/// <param name="configurableString"></param>
+	/// <param name="configurableString">
+	/// The configurable string from which the <see cref="Value"/> will be returned.
+	/// </param>
 	public static implicit operator string?(ConfigurableString? configurableString)
 	{
 		return configurableString?.Value;
