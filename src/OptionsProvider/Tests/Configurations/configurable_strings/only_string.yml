@@ -1,0 +1,7 @@
+metadata:
+    # This is an example that is also used in tests.
+    isPersistent: true
+    owners: Justin@site.com
+options:
+    config:
+        myConfigurableString: "This will not get replaced {{2}} {{1}} {{more}} END."

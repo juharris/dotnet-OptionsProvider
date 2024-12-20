@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 
 namespace OptionsProvider.String;
 
@@ -16,6 +17,7 @@ namespace OptionsProvider.String;
 /// In some cases we may add options to configure the replacement logic so that the old behavior can be enabled again.
 /// </remarks>
 [DebuggerDisplay("{Value,nq}")]
+[TypeConverter(typeof(ConfigurableStringTypeConverter))]
 public sealed class ConfigurableString
 {
 	/// <summary>
@@ -37,7 +39,7 @@ public sealed class ConfigurableString
 	/// </para>
 	/// Use an empty string to replace a slot with an empty string.
 	/// </summary>
-	public required IReadOnlyDictionary<string, string?>? Values { get; init; }
+	public IReadOnlyDictionary<string, string?>? Values { get; init; }
 
 	/// <summary>
 	/// A custom start delimiter for the slots to indentify the start of a slot to fill.
@@ -151,7 +153,6 @@ public sealed class ConfigurableString
 		return new ConfigurableString
 		{
 			Template = value,
-			Values = null,
 		};
 	}
 }
