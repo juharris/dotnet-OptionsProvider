@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace OptionsProvider.String;
 
-internal class ConfigurableStringTypeConverter : TypeConverter
+internal sealed class ConfigurableStringTypeConverter : TypeConverter
 {
 	public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
 	{

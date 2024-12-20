@@ -329,7 +329,7 @@ options:
 ```
 
 The resulting value for `MyString.Value` with the features `["default", "raw_string"]` enabled will be: `"{{greeting}} This is a raw string and no replacements will be done."`.
-Again, this is just for convenience for quick experimentation and not collaborative because the string cannot be configured by applying new features to the list of enabled features.
+Again, this is just for convenience for quick experimentation and not collaborative because in this case `myString` cannot be further configured by applying new features to the list of enabled features once the `"raw_string"` feature is in the list.
 
 Delimiters can be customized. Example:
 ```yaml
