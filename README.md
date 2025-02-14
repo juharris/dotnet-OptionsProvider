@@ -1,6 +1,11 @@
 # OptionsProvider
 Enables loading configurations from JSON files, YAML files, or your own custom implementations of [`IConfigurationSource`][custom-configuration-provider] to manage options for experiments or different configurations of your service which can overlap or intersect.
 
+![NuGet Version](https://img.shields.io/nuget/v/OptionsProvider)
+
+See [Optify](https://github.com/juharris/optify) for an implementations in Ruby, Rust, and more coming soon.
+That repository is mainly for versions backed by the Rust implementation where arrays are not merged only entirely overwritten, as might be more expected in other languages and unlike .NET's `IConfiguration`.
+
 Core Features:
 * **Each *feature flag* can be represented by a JSON or YAML file** which contains options to override default configuration values when processing feature names or experiment names in a request.
 Note that YAML support is still experimental and parsing may change.
@@ -58,6 +63,7 @@ Now you want to start experimenting with different values deep within `MyConfigu
 
 Create a **new** folder for configurations files, for this example, we'll call it `Configurations` and add some files to it.
 All `*.json`, `*.yaml`, and `*.yml` files in `Configurations` and any of its subdirectories will be loaded into memory.
+Markdown files (ending in `.md`) are ignored.
 
 Create `Configurations/feature_A.json`:
 ```json
