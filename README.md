@@ -3,6 +3,15 @@ Enables loading configurations from JSON files, YAML files, or your own custom i
 
 ![NuGet Version](https://img.shields.io/nuget/v/OptionsProvider)
 
+This project helps code scale better and be easier to maintain.
+We should determine the right configuration for a request or process when it starts by passing the enabled features to an `IOptionsProvider`.
+The returned options would be used throughout the request or process to change business logic.
+Supporting deep configurations with many types of properties instead of simple enabled/disabled feature flags is important to help avoid conditional statements (`if` statements) and thus help code scale and be more maintainable as explained in [this article][cond-blog].
+
+It's fine to use systems that support enabled/disabled feature flags, but we'll inevitably need to support more sophisticated configurations.
+This project facilitates using deep configurations to be the backing for simple feature flags, thus keeping API contracts clean and facilitating the refactoring of code that uses the configurations.
+Allowing clients to know about and pass in deep configurations for specific components is hard to maintain and makes it difficult to change the structure of the configurations.
+
 See [Optify](https://github.com/juharris/optify) for an implementations in Ruby, Rust, and more coming soon.
 That repository is mainly for versions backed by the Rust implementation where arrays are not merged only entirely overwritten, as might be more expected in other languages and unlike .NET's `IConfiguration`.
 
@@ -438,6 +447,7 @@ dotnet nuget push OptionsProvider/bin/Release/OptionsProvider.*.nupkg  --source 
 ```
 
 [azure-app-configuration]: https://learn.microsoft.com/en-us/azure/azure-app-configuration/
+[cond-blog]: https://medium.com/@justindharris/conditioning-code-craft-clear-and-concise-conditional-code-f4f328c43c2b
 [ConfigurableString]: ./src/OptionsProvider/OptionsProvider/String/ConfigurableString.cs
 [custom-configuration-provider]: https://learn.microsoft.com/en-us/dotnet/core/extensions/custom-configuration-provider
 [MemoryCacheEntryOptions]: https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.caching.memory.memorycacheentryoptions
